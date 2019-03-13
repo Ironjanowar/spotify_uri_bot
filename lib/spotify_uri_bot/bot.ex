@@ -12,7 +12,7 @@ defmodule SpotifyUriBot.Bot do
     answer(context, "Hi!")
   end
 
-  def handle({:text, text, _msg}, context) do
+  def handle({:text, text, %{message_id: message_id}}, context) do
     case SpotifyUriBot.Utils.parse_text(text) do
       {:ok, :track, uri} ->
         {:ok, track} = SpotifyUriBot.Server.get_track(uri)
@@ -23,7 +23,13 @@ defmodule SpotifyUriBot.Bot do
         📀 Album: `#{track[:album]}`
         """
 
-        answer(context, message, parse_mode: "Markdown")
+        markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
+
+        answer(context, message,
+          parse_mode: "Markdown",
+          reply_to_message_id: message_id,
+          reply_markup: markup
+        )
 
       {:ok, :album, uri} ->
         {:ok, album} = SpotifyUriBot.Server.get_album(uri)
@@ -34,7 +40,13 @@ defmodule SpotifyUriBot.Bot do
         📅 Release date: `#{album[:release_date]}`
         """
 
-        answer(context, message, parse_mode: "Markdown")
+        markup = SpotifyUriBot.Utils.generate_url_button(album[:href])
+
+        answer(context, message,
+          parse_mode: "Markdown",
+          reply_to_message_id: message_id,
+          reply_markup: markup
+        )
 
       {:ok, :artist, uri} ->
         {:ok, artist} = SpotifyUriBot.Server.get_artist(uri)
@@ -43,10 +55,30 @@ defmodule SpotifyUriBot.Bot do
         🎤 Artist: `#{artist[:name]}`
         """
 
-        answer(context, message, parse_mode: "Markdown")
+        answer(context, message, parse_mode: "Markdown", reply_to_message_id: message_id)
+
+      {:ok, :playlist, uri} ->
+        {:ok, playlist} = SpotifyUriBot.Server.get_playlist(uri)
+
+        description =
+          case playlist[:description] do
+            d when d in ["", nil] -> ""
+            d -> "Description: `#{d}`"
+          end
+
+        message = """
+        Name: `#{playlist[:name]}`
+        Owner: `#{playlist[:owner]}`
+        #{description}
+        """
+
+        answer(context, message, parse_mode: "Markdown", reply_to_message_id: message_id)
 
       {:error, message} ->
         Logger.debug(message)
+
+      unknown ->
+        Logger.debug("Unknown text: #{inspect(unknown)}")
     end
   end
 end

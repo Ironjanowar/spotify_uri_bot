@@ -26,10 +26,11 @@ defmodule SpotifyUriBot.Api do
     %{
       "artists" => [%{"name" => artist} | _],
       "album" => %{"name" => album_name},
-      "name" => song_name
+      "name" => song_name,
+      "external_urls" => %{"spotify" => href}
     } = Jason.decode!(body)
 
-    {:ok, %{artist: artist, album: album_name, song: song_name}}
+    {:ok, %{artist: artist, album: album_name, song: song_name, href: href}}
   end
 
   def get_album(album_id, token) do
@@ -41,10 +42,11 @@ defmodule SpotifyUriBot.Api do
     %{
       "name" => album_name,
       "artists" => [%{"name" => artist} | _],
-      "release_date" => release_date
+      "release_date" => release_date,
+      "external_urls" => %{"spotify" => href}
     } = Jason.decode!(body)
 
-    {:ok, %{artist: artist, name: album_name, release_date: release_date}}
+    {:ok, %{artist: artist, name: album_name, release_date: release_date, href: href}}
   end
 
   def get_artist(artist_id, token) do
@@ -56,5 +58,20 @@ defmodule SpotifyUriBot.Api do
     %{"name" => name} = Jason.decode!(body)
 
     {:ok, %{name: name}}
+  end
+
+  def get_playlist(playlist_id, token) do
+    {:ok, %{body: body}} =
+      get("https://api.spotify.com/v1/playlists/#{playlist_id}",
+        headers: [{"Authorization", "Bearer #{token}"}]
+      )
+
+    %{
+      "name" => name,
+      "owner" => %{"display_name" => owner},
+      "description" => description
+    } = Jason.decode!(body)
+
+    {:ok, %{name: name, owner: owner, description: description}}
   end
 end

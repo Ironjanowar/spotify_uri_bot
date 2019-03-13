@@ -3,7 +3,15 @@ defmodule SpotifyUriBot.Utils do
 
   uri_parse =
     ignore(string("spotify:"))
-    |> choice([string("track"), string("album"), string("artist")])
+    |> choice([
+      string("track"),
+      string("album"),
+      string("artist"),
+      ignore(string("user:"))
+      |> ignore(ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1))
+      |> ignore(string(":"))
+      |> string("playlist")
+    ])
     |> ignore(string(":"))
     |> ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1)
 
@@ -16,7 +24,7 @@ defmodule SpotifyUriBot.Utils do
 
   def parse_text(text) do
     text
-    |> String.split(" ")
+    |> String.split(" ", trim: true)
     |> Enum.find(fn t ->
       case uri_parser(t) do
         {:ok, _, _, _, _, _} -> true
@@ -25,5 +33,9 @@ defmodule SpotifyUriBot.Utils do
     end)
     |> uri_parser()
     |> spotify_uri?()
+  end
+
+  def generate_url_button(url) do
+    ExGram.Dsl.create_inline([[[text: "Open in Spotify", url: url]]])
   end
 end

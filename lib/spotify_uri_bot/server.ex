@@ -25,6 +25,10 @@ defmodule SpotifyUriBot.Server do
     GenServer.call(__MODULE__, {:artist, artist_id})
   end
 
+  def get_playlist(playlist_id) do
+    GenServer.call(__MODULE__, {:playlist, playlist_id})
+  end
+
   # Server callbacks
   def init(:ok) do
     {:ok, %{}}
@@ -46,5 +50,11 @@ defmodule SpotifyUriBot.Server do
     {:ok, token} = SpotifyUriBot.Api.get_token()
     {:ok, artist_info} = SpotifyUriBot.Api.get_artist(artist_id, token)
     {:reply, {:ok, artist_info}, state}
+  end
+
+  def handle_call({:playlist, playlist_id}, _from, state) do
+    {:ok, token} = SpotifyUriBot.Api.get_token()
+    {:ok, playlist_info} = SpotifyUriBot.Api.get_playlist(playlist_id, token)
+    {:reply, {:ok, playlist_info}, state}
   end
 end
