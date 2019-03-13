@@ -36,6 +36,15 @@ defmodule SpotifyUriBot.Bot do
 
         answer(context, message, parse_mode: "Markdown")
 
+      {:ok, :artist, uri} ->
+        {:ok, artist} = SpotifyUriBot.Server.get_artist(uri)
+
+        message = """
+        🎤 Artist: `#{artist[:name]}`
+        """
+
+        answer(context, message, parse_mode: "Markdown")
+
       {:error, message} ->
         Logger.debug(message)
     end

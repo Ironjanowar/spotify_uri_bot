@@ -46,4 +46,15 @@ defmodule SpotifyUriBot.Api do
 
     {:ok, %{artist: artist, name: album_name, release_date: release_date}}
   end
+
+  def get_artist(artist_id, token) do
+    {:ok, %{body: body}} =
+      get("https://api.spotify.com/v1/artists/#{artist_id}",
+        headers: [{"Authorization", "Bearer #{token}"}]
+      )
+
+    %{"name" => name} = Jason.decode!(body)
+
+    {:ok, %{name: name}}
+  end
 end
