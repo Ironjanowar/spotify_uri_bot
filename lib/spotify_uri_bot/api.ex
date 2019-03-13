@@ -1,15 +1,15 @@
 defmodule SpotifyUriBot.Api do
   use Tesla
 
-  @client_token ExGram.Config.get(:spotify_uri_bot, :client_token)
-
   plug(Tesla.Middleware.FormUrlencoded)
 
   def get_token() do
+    client_token = ExGram.Config.get(:spotify_uri_bot, :client_token)
+
     {:ok, %{body: body}} =
       post("https://accounts.spotify.com/api/token", %{grant_type: "client_credentials"},
         headers: [
-          {"Authorization", "Basic #{@client_token}"}
+          {"Authorization", "Basic #{client_token}"}
         ]
       )
 
@@ -30,5 +30,20 @@ defmodule SpotifyUriBot.Api do
     } = Jason.decode!(body)
 
     {:ok, %{artist: artist, album: album_name, song: song_name}}
+  end
+
+  def get_album(album_id, token) do
+    {:ok, %{body: body}} =
+      get("https://api.spotify.com/v1/albums/#{album_id}",
+        headers: [{"Authorization", "Bearer #{token}"}]
+      )
+
+    %{
+      "name" => album_name,
+      "artists" => [%{"name" => artist} | _],
+      "release_date" => release_date
+    } = Jason.decode!(body)
+
+    {:ok, %{artist: artist, name: album_name, release_date: release_date}}
   end
 end

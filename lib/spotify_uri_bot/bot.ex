@@ -14,13 +14,25 @@ defmodule SpotifyUriBot.Bot do
 
   def handle({:text, text, _msg}, context) do
     case SpotifyUriBot.Utils.parse_text(text) do
-      {:ok, uri} ->
+      {:ok, :track, uri} ->
         {:ok, track} = SpotifyUriBot.Server.get_track(uri)
 
-        message =
-          "🎤 `Artist:` #{track[:artist]}\n🎵 `  Song:` #{track[:song]}\n📀 ` Album:` #{
-            track[:album]
-          }"
+        message = """
+        🎤 Artist: `#{track[:artist]}`
+        🎵 Song: `#{track[:song]}`
+        📀 Album: `#{track[:album]}`
+        """
+
+        answer(context, message, parse_mode: "Markdown")
+
+      {:ok, :album, uri} ->
+        {:ok, album} = SpotifyUriBot.Server.get_album(uri)
+
+        message = """
+        🎤 Artist: `#{album[:artist]}`
+        📀 Album: `#{album[:name]}`
+        📅 Release date: `#{album[:release_date]}`
+        """
 
         answer(context, message, parse_mode: "Markdown")
 
