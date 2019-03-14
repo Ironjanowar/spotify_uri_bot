@@ -27,10 +27,11 @@ defmodule SpotifyUriBot.Api do
       "artists" => [%{"name" => artist} | _],
       "album" => %{"name" => album_name},
       "name" => song_name,
-      "external_urls" => %{"spotify" => href}
+      "external_urls" => %{"spotify" => href},
+      "uri" => uri
     } = Jason.decode!(body)
 
-    {:ok, %{artist: artist, album: album_name, song: song_name, href: href}}
+    {:ok, %{artist: artist, album: album_name, song: song_name, href: href, uri: uri}}
   end
 
   def get_album(album_id, token) do
@@ -43,10 +44,11 @@ defmodule SpotifyUriBot.Api do
       "name" => album_name,
       "artists" => [%{"name" => artist} | _],
       "release_date" => release_date,
-      "external_urls" => %{"spotify" => href}
+      "external_urls" => %{"spotify" => href},
+      "uri" => uri
     } = Jason.decode!(body)
 
-    {:ok, %{artist: artist, name: album_name, release_date: release_date, href: href}}
+    {:ok, %{artist: artist, name: album_name, release_date: release_date, href: href, uri: uri}}
   end
 
   def get_artist(artist_id, token) do
@@ -55,9 +57,9 @@ defmodule SpotifyUriBot.Api do
         headers: [{"Authorization", "Bearer #{token}"}]
       )
 
-    %{"name" => name} = Jason.decode!(body)
+    %{"name" => name, "external_urls" => %{"spotify" => href}, "uri" => uri} = Jason.decode!(body)
 
-    {:ok, %{name: name}}
+    {:ok, %{name: name, href: href, uri: uri}}
   end
 
   def get_playlist(playlist_id, token) do
@@ -69,9 +71,11 @@ defmodule SpotifyUriBot.Api do
     %{
       "name" => name,
       "owner" => %{"display_name" => owner},
-      "description" => description
+      "description" => description,
+      "external_urls" => %{"spotify" => href},
+      "uri" => uri
     } = Jason.decode!(body)
 
-    {:ok, %{name: name, owner: owner, description: description}}
+    {:ok, %{name: name, owner: owner, description: description, href: href, uri: uri}}
   end
 end

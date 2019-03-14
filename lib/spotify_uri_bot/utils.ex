@@ -17,22 +17,15 @@ defmodule SpotifyUriBot.Utils do
 
   defparsec(:uri_parser, uri_parse)
 
-  def spotify_uri?({:ok, [type, uri], _, _, _, _}),
-    do: {:ok, String.to_atom(type), uri}
-
-  def spotify_uri?(_), do: {:error, "Spotify URI not found in text"}
-
   def parse_text(text) do
     text
     |> String.split(" ", trim: true)
-    |> Enum.find(fn t ->
+    |> Enum.find_value(fn t ->
       case uri_parser(t) do
-        {:ok, _, _, _, _, _} -> true
-        _ -> false
+        {:ok, [type, uri], _, _, _, _} -> {:ok, String.to_atom(type), uri}
+        _ -> nil
       end
     end)
-    |> uri_parser()
-    |> spotify_uri?()
   end
 
   def generate_url_button(url) do

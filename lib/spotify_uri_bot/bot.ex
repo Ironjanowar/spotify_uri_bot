@@ -21,6 +21,7 @@ defmodule SpotifyUriBot.Bot do
         🎤 Artist: `#{track[:artist]}`
         🎵 Song: `#{track[:song]}`
         📀 Album: `#{track[:album]}`
+        🔗 URI: `#{track[:uri]}`
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
@@ -38,6 +39,7 @@ defmodule SpotifyUriBot.Bot do
         🎤 Artist: `#{album[:artist]}`
         📀 Album: `#{album[:name]}`
         📅 Release date: `#{album[:release_date]}`
+        🔗 URI: `#{album[:uri]}`
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(album[:href])
@@ -53,9 +55,16 @@ defmodule SpotifyUriBot.Bot do
 
         message = """
         🎤 Artist: `#{artist[:name]}`
+        🔗 URI: `#{artist[:uri]}`
         """
 
-        answer(context, message, parse_mode: "Markdown", reply_to_message_id: message_id)
+        markup = SpotifyUriBot.Utils.generate_url_button(artist[:href])
+
+        answer(context, message,
+          parse_mode: "Markdown",
+          reply_to_message_id: message_id,
+          reply_markup: markup
+        )
 
       {:ok, :playlist, uri} ->
         {:ok, playlist} = SpotifyUriBot.Server.get_playlist(uri)
@@ -67,12 +76,19 @@ defmodule SpotifyUriBot.Bot do
           end
 
         message = """
-        Name: `#{playlist[:name]}`
-        Owner: `#{playlist[:owner]}`
+        📄 Name: `#{playlist[:name]}`
+        👤 Owner: `#{playlist[:owner]}`
+        🔗 URI: `#{playlist[:uri]}`
         #{description}
         """
 
-        answer(context, message, parse_mode: "Markdown", reply_to_message_id: message_id)
+        markup = SpotifyUriBot.Utils.generate_url_button(playlist[:href])
+
+        answer(context, message,
+          parse_mode: "Markdown",
+          reply_to_message_id: message_id,
+          reply_markup: markup
+        )
 
       {:error, message} ->
         Logger.debug(message)
