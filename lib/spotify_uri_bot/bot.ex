@@ -13,6 +13,27 @@ defmodule SpotifyUriBot.Bot do
   end
 
   def handle({:text, text, %{message_id: message_id}}, context) do
+    case generate_message(text) do
+      :no_message ->
+        :ok
+
+      {message, :no_markup} ->
+        answer(context, message,
+          parse_mode: "Markdown",
+          reply_to_message_id: message_id
+        )
+
+      {message, markup} ->
+        answer(context, message,
+          parse_mode: "Markdown",
+          reply_to_message_id: message_id,
+          reply_markup: markup
+        )
+    end
+  end
+
+  # Private
+  defp generate_message(text) do
     case SpotifyUriBot.Utils.parse_text(text) do
       {:ok, :track, uri} ->
         {:ok, track} = SpotifyUriBot.Server.get_track(uri)
@@ -25,12 +46,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
-
-        answer(context, message,
-          parse_mode: "Markdown",
-          reply_to_message_id: message_id,
-          reply_markup: markup
-        )
+        {message, markup}
 
       {:ok, :album, uri} ->
         {:ok, album} = SpotifyUriBot.Server.get_album(uri)
@@ -43,12 +59,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(album[:href])
-
-        answer(context, message,
-          parse_mode: "Markdown",
-          reply_to_message_id: message_id,
-          reply_markup: markup
-        )
+        {message, markup}
 
       {:ok, :artist, uri} ->
         {:ok, artist} = SpotifyUriBot.Server.get_artist(uri)
@@ -60,11 +71,7 @@ defmodule SpotifyUriBot.Bot do
 
         markup = SpotifyUriBot.Utils.generate_url_button(artist[:href])
 
-        answer(context, message,
-          parse_mode: "Markdown",
-          reply_to_message_id: message_id,
-          reply_markup: markup
-        )
+        {message, markup}
 
       {:ok, :playlist, uri} ->
         {:ok, playlist} = SpotifyUriBot.Server.get_playlist(uri)
@@ -83,18 +90,15 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(playlist[:href])
-
-        answer(context, message,
-          parse_mode: "Markdown",
-          reply_to_message_id: message_id,
-          reply_markup: markup
-        )
+        {message, markup}
 
       {:error, message} ->
         Logger.debug(message)
+        :no_message
 
       unknown ->
         Logger.debug("Unknown text: #{inspect(unknown)}")
+        :no_message
     end
   end
 end
