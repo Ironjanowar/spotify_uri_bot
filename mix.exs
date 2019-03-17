@@ -25,7 +25,8 @@ defmodule SpotifyUriBot.MixProject do
       {:ex_gram, "~> 0.6"},
       {:tesla, "~> 1.2.1"},
       {:jason, "~> 1.1"},
-      {:nimble_parsec, "~> 0.2"}
+      {:nimble_parsec, "~> 0.2"},
+      {:distillery, "~> 2.0"}
     ]
   end
 end
