@@ -10,7 +10,7 @@ token:
 export BOT_TOKEN = $(shell cat bot.token)
 export CLIENT_TOKEN = $(shell cat client.token)
 
-run: token
+start: token
 	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot start
 
 iex: token
@@ -32,4 +32,4 @@ attach:
 release: deps compile
 	mix release
 
-.PHONY: deps compile release run clean purge token iex stop attach
+.PHONY: deps compile release start clean purge token iex stop attach

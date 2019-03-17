@@ -1,0 +1,32 @@
+* Run it
+Create a bot talking to ~@BotFather~ in Telegram.
+Create a ~bot.token~ file with the bot token provided by ~@BotFather~, for example:
+#+BEGIN_SRC shell
+echo "<bot_token>" > bot.token
+#+END_SRC
+
+Create a ~client.token~ with the client ID and client secret from an spotify APP, the format should be:
+#+BEGIN_SRC shell
+echo -n "<client_id>:<client_secret>" | base64 -w 0 > client.token
+#+END_SRC
+
+Create a release with:
+#+BEGIN_SRC shell
+make release
+#+END_SRC
+
+Start the bot with:
+#+BEGIN_SRC shell
+make start
+#+END_SRC
+
+* Attach and stop
+To attach to the bot execute:
+#+BEGIN_SRC shell
+make attach
+#+END_SRC
+
+To stop the bot execute:
+#+BEGIN_SRC shell
+make stop
+#+END_SRC
