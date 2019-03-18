@@ -15,7 +15,23 @@ defmodule SpotifyUriBot.Utils do
     |> ignore(string(":"))
     |> ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1)
 
-  defparsec(:uri_parser, uri_parse)
+  url_parse =
+    ignore(string("https://open.spotify.com/"))
+    |> choice([
+      string("track"),
+      string("album"),
+      string("artist"),
+      ignore(string("user/"))
+      |> ignore(ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1))
+      |> ignore(string("/"))
+      |> string("playlist")
+    ])
+    |> ignore(string("/"))
+    |> ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1)
+
+  parse = choice([uri_parse, url_parse])
+
+  defparsec(:uri_parser, parse)
 
   def parse_text(text) do
     text

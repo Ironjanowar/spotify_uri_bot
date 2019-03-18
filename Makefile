@@ -32,4 +32,7 @@ attach:
 release: deps compile
 	mix release
 
-.PHONY: deps compile release start clean purge token iex stop attach
+debug: token
+	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot console
+
+.PHONY: deps compile release start clean purge token iex stop attach debug
