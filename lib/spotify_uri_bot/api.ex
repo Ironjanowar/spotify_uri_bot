@@ -3,25 +3,36 @@ defmodule SpotifyUriBot.Api do
 
   plug(Tesla.Middleware.FormUrlencoded)
 
+  def client(client_token) do
+    middlewares = [
+      {Tesla.Middleware.BaseUrl, "https://accounts.spotify.com"},
+      {Tesla.Middleware.Headers, [{"Authorization", "Basic #{client_token}"}]}
+    ]
+
+    Tesla.client(middlewares)
+  end
+
+  def authorized_client(token) do
+    middlewares = [
+      {Tesla.Middleware.BaseUrl, "https://api.spotify.com/v1"},
+      {Tesla.Middleware.Headers, [{"Authorization", "Bearer #{token}"}]}
+    ]
+
+    Tesla.client(middlewares)
+  end
+
   def get_token() do
     client_token = ExGram.Config.get(:spotify_uri_bot, :client_token)
 
     {:ok, %{body: body}} =
-      post("https://accounts.spotify.com/api/token", %{grant_type: "client_credentials"},
-        headers: [
-          {"Authorization", "Basic #{client_token}"}
-        ]
-      )
+      client_token |> client() |> post("/api/token", %{grant_type: "client_credentials"})
 
     %{"access_token" => token} = Jason.decode!(body)
     {:ok, token}
   end
 
   def get_track(track_id, token) do
-    {:ok, %{body: body}} =
-      get("https://api.spotify.com/v1/tracks/#{track_id}",
-        headers: [{"Authorization", "Bearer #{token}"}]
-      )
+    {:ok, %{body: body}} = token |> authorized_client() |> get("/tracks/#{track_id}")
 
     %{
       "artists" => [%{"name" => artist} | _],
@@ -35,10 +46,7 @@ defmodule SpotifyUriBot.Api do
   end
 
   def get_album(album_id, token) do
-    {:ok, %{body: body}} =
-      get("https://api.spotify.com/v1/albums/#{album_id}",
-        headers: [{"Authorization", "Bearer #{token}"}]
-      )
+    {:ok, %{body: body}} = token |> authorized_client() |> get("/albums/#{album_id}")
 
     %{
       "name" => album_name,
@@ -52,10 +60,7 @@ defmodule SpotifyUriBot.Api do
   end
 
   def get_artist(artist_id, token) do
-    {:ok, %{body: body}} =
-      get("https://api.spotify.com/v1/artists/#{artist_id}",
-        headers: [{"Authorization", "Bearer #{token}"}]
-      )
+    {:ok, %{body: body}} = token |> authorized_client() |> get("/artists/#{artist_id}")
 
     %{"name" => name, "external_urls" => %{"spotify" => href}, "uri" => uri} = Jason.decode!(body)
 
@@ -63,10 +68,7 @@ defmodule SpotifyUriBot.Api do
   end
 
   def get_playlist(playlist_id, token) do
-    {:ok, %{body: body}} =
-      get("https://api.spotify.com/v1/playlists/#{playlist_id}",
-        headers: [{"Authorization", "Bearer #{token}"}]
-      )
+    {:ok, %{body: body}} = token |> authorized_client() |> get("/playlists/#{playlist_id}")
 
     %{
       "name" => name,
