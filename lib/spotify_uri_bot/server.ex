@@ -1,6 +1,8 @@
 defmodule SpotifyUriBot.Server do
   use GenServer
 
+  require Logger
+
   def child_spec(_) do
     %{
       id: __MODULE__,
@@ -63,6 +65,7 @@ defmodule SpotifyUriBot.Server do
   end
 
   def handle_call({:search, query}, _from, state) do
+    Logger.debug("Searching #{query}")
     {:ok, token} = SpotifyUriBot.Api.get_token()
     {:ok, %{body: body}} = SpotifyUriBot.Api.search(query, [:track], token)
 
@@ -82,6 +85,7 @@ defmodule SpotifyUriBot.Server do
             }
           end)
 
+        Logger.debug("Tracks result:\n#{inspect(tracks)}")
         {:reply, {:ok, tracks}, state}
 
       _ ->
