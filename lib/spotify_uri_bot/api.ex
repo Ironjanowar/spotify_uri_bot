@@ -80,4 +80,11 @@ defmodule SpotifyUriBot.Api do
 
     {:ok, %{name: name, owner: owner, description: description, href: href, uri: uri}}
   end
+
+  def search(query, types, token) do
+    types = Enum.join(types, ",")
+    params = [q: URI.encode(query), type: types, limit: 5]
+
+    token |> authorized_client() |> get("/search", query: params)
+  end
 end

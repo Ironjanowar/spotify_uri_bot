@@ -1,6 +1,9 @@
 defmodule SpotifyUriBot.Utils do
   import NimbleParsec
 
+  alias ExGram.Model.InlineQueryResultAudio
+  alias ExGram.Model.InputTextMessageContent
+
   uri_parse =
     ignore(string("spotify:"))
     |> choice([
@@ -46,5 +49,29 @@ defmodule SpotifyUriBot.Utils do
 
   def generate_url_button(url) do
     ExGram.Dsl.create_inline([[[text: "Open in Spotify", url: url]]])
+  end
+
+  def search_result_to_result_audio(track) do
+    message_format = """
+    🎤 Artist: `#{track[:artist]}`
+    🎵 Song: `#{track[:name]}`
+    📀 Album: `#{track[:album]}`
+    🔗 URI: `#{track[:uri]}`
+    """
+
+    markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
+
+    %InlineQueryResultAudio{
+      type: "audio",
+      id: track[:uri],
+      title: track[:name],
+      performer: track[:artist],
+      audio_url: track[:preview_url],
+      input_message_content: %InputTextMessageContent{
+        message_text: message_format,
+        parse_mode: "Markdown"
+      },
+      reply_markup: markup
+    }
   end
 end

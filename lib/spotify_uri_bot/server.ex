@@ -29,6 +29,10 @@ defmodule SpotifyUriBot.Server do
     GenServer.call(__MODULE__, {:playlist, playlist_id})
   end
 
+  def search(query) do
+    GenServer.call(__MODULE__, {:search, query})
+  end
+
   # Server callbacks
   def init(:ok) do
     {:ok, %{}}
@@ -56,5 +60,32 @@ defmodule SpotifyUriBot.Server do
     {:ok, token} = SpotifyUriBot.Api.get_token()
     {:ok, playlist_info} = SpotifyUriBot.Api.get_playlist(playlist_id, token)
     {:reply, {:ok, playlist_info}, state}
+  end
+
+  def handle_call({:search, query}, _from, state) do
+    {:ok, token} = SpotifyUriBot.Api.get_token()
+    {:ok, %{body: body}} = SpotifyUriBot.Api.search(query, [:track], token)
+
+    case Jason.decode(body) do
+      {:ok, %{"tracks" => %{"items" => items}}} ->
+        tracks =
+          Enum.map(items, fn item ->
+            [artist | _] = item["artists"]
+
+            %{
+              name: item["name"],
+              album: item["album"]["name"],
+              artist: artist["name"],
+              href: item["external_urls"]["spotify"],
+              uri: item["uri"],
+              preview_url: item["preview_url"]
+            }
+          end)
+
+        {:reply, {:ok, tracks}, state}
+
+      _ ->
+        {:reply, {:ok, []}, state}
+    end
   end
 end

@@ -57,6 +57,11 @@ defmodule SpotifyUriBot.Bot do
            }
          ]}
 
+      {:no_uri, _search_query} ->
+        {:ok, result} = SpotifyUriBot.Server.search(text)
+        audios = Enum.map(result, &SpotifyUriBot.Utils.search_result_to_result_audio/1)
+        {:ok, audios}
+
       _ ->
         :ignore
     end
@@ -123,11 +128,11 @@ defmodule SpotifyUriBot.Bot do
 
       {:error, message} ->
         Logger.debug(message)
-        :no_message
+        :no_uri
 
-      unknown ->
-        Logger.debug("Unknown text: #{inspect(unknown)}")
-        :no_message
+      search_query ->
+        Logger.debug("Unknown text: #{inspect(search_query)}\nSearching...")
+        {:no_uri, search_query}
     end
   end
 end
