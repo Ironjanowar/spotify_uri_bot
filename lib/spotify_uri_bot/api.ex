@@ -39,10 +39,19 @@ defmodule SpotifyUriBot.Api do
       "album" => %{"name" => album_name},
       "name" => song_name,
       "external_urls" => %{"spotify" => href},
-      "uri" => uri
+      "uri" => uri,
+      "preview_url" => preview_url
     } = Jason.decode!(body)
 
-    {:ok, %{artist: artist, album: album_name, name: song_name, href: href, uri: uri}}
+    {:ok,
+     %{
+       artist: artist,
+       album: album_name,
+       name: song_name,
+       href: href,
+       uri: uri,
+       preview_url: preview_url
+     }}
   end
 
   def get_album(album_id, token) do

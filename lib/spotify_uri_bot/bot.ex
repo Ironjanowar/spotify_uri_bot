@@ -4,6 +4,7 @@ defmodule SpotifyUriBot.Bot do
   use ExGram.Bot,
     name: @bot
 
+  alias ExGram.Model.InlineQueryResultAudio
   alias ExGram.Model.InlineQueryResultArticle
   alias ExGram.Model.InputTextMessageContent
 
@@ -41,7 +42,28 @@ defmodule SpotifyUriBot.Bot do
   # Private
   defp generate_inline_options(text) do
     case generate_message(text) do
+      {:ok, %{info: %{preview_url: preview_url}} = result} when not is_nil(preview_url) ->
+        Logger.debug("Generating audio")
+
+        {:ok,
+         [
+           %InlineQueryResultAudio{
+             type: "audio",
+             id: result[:info][:uri],
+             title: result[:info][:name],
+             performer: result[:info][:artist],
+             audio_url: result[:info][:preview_url],
+             input_message_content: %InputTextMessageContent{
+               message_text: result[:message],
+               parse_mode: "Markdown"
+             },
+             reply_markup: result[:markup]
+           }
+         ]}
+
       {:ok, result} ->
+        Logger.debug("Generating article: #{inspect(result)}")
+
         {:ok,
          [
            %InlineQueryResultArticle{
@@ -80,7 +102,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
-        {:ok, message: message, markup: markup, info: track, entity: "Track"}
+        {:ok, %{message: message, markup: markup, info: track, entity: "Track"}}
 
       {:ok, :album, uri} ->
         {:ok, album} = SpotifyUriBot.Server.get_album(uri)
@@ -93,7 +115,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(album[:href])
-        {:ok, message: message, markup: markup, info: album, entity: "Album"}
+        {:ok, %{message: message, markup: markup, info: album, entity: "Album"}}
 
       {:ok, :artist, uri} ->
         {:ok, artist} = SpotifyUriBot.Server.get_artist(uri)
@@ -105,7 +127,7 @@ defmodule SpotifyUriBot.Bot do
 
         markup = SpotifyUriBot.Utils.generate_url_button(artist[:href])
 
-        {:ok, message: message, markup: markup, info: artist, entity: "Artist"}
+        {:ok, %{message: message, markup: markup, info: artist, entity: "Artist"}}
 
       {:ok, :playlist, uri} ->
         {:ok, playlist} = SpotifyUriBot.Server.get_playlist(uri)
@@ -124,7 +146,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(playlist[:href])
-        {:ok, message: message, markup: markup, info: playlist, entity: "Playlist"}
+        {:ok, %{message: message, markup: markup, info: playlist, entity: "Playlist"}}
 
       {:error, message} ->
         Logger.debug(message)
