@@ -52,6 +52,15 @@ defmodule SpotifyUriBot.Utils do
     ExGram.Dsl.create_inline([[[text: "Open in Spotify", url: url]]])
   end
 
+  def generate_url_buttons(url, uri) do
+    ExGram.Dsl.create_inline([
+      [
+        [text: "Open in Spotify", url: url],
+        [text: "Show preview", switch_inline_query_current_chat: uri]
+      ]
+    ])
+  end
+
   def search_result_to_result_audio(%{preview_url: nil} = track) do
     message_format = """
     🎤 Artist: `#{track[:artist]}`
