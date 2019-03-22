@@ -92,7 +92,11 @@ defmodule SpotifyUriBot.Utils do
     🔗 URI: `#{track[:uri]}`
     """
 
-    markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
+    markup =
+      case track[:preview_url] do
+        nil -> SpotifyUriBot.Utils.generate_url_button(track[:href])
+        _ -> SpotifyUriBot.Utils.generate_url_buttons(track[:href], track[:uri])
+      end
 
     %InlineQueryResultAudio{
       type: "audio",
