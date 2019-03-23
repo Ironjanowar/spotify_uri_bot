@@ -6,4 +6,5 @@ config :ex_gram,
   token: {:system, "BOT_TOKEN"}
 
 config :spotify_uri_bot,
-  client_token: {:system, "CLIENT_TOKEN"}
+  client_token: {:system, "CLIENT_TOKEN"},
+  admins: []

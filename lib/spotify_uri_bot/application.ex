@@ -9,8 +9,10 @@ defmodule SpotifyUriBot.Application do
     # List all child processes to be supervised
     children = [
       ExGram,
-      {SpotifyUriBot.Bot, [method: :polling, token: token]},
-      SpotifyUriBot.Server
+      SpotifyUriBot.Server,
+      SpotifyUriBot.Stats,
+      {Redix, [host: "localhost", port: 6379, name: :redix]},
+      {SpotifyUriBot.Bot, [method: :polling, token: token]}
     ]
 
     opts = [strategy: :one_for_one, name: SpotifyUriBot.Supervisor]

@@ -10,6 +10,9 @@ defmodule SpotifyUriBot.Bot do
 
   require Logger
 
+  middleware(SpotifyUriBot.Middleware.Stats)
+  middleware(SpotifyUriBot.Middleware.Admin)
+
   def bot(), do: @bot
 
   def handle({:command, "start", _msg}, context) do
@@ -42,7 +45,23 @@ defmodule SpotifyUriBot.Bot do
     end
   end
 
-  def handle(_, _) do
+  # Admin commands
+  def handle({:command, "stats", _}, %{extra: %{is_admin: true}} = context) do
+    %{users: users, groups: groups} = SpotifyUriBot.Stats.get_stats()
+    users_count = Enum.count(users)
+    groups_count = Enum.count(groups)
+
+    message = """
+    Number of users and groups that have used the bot:
+    Users:  *#{users_count}*
+    Groups: *#{groups_count}*
+    """
+
+    answer(context, message, parse_mode: "Markdown")
+  end
+
+  def handle(_, cnt) do
+    Logger.debug("Ignoring update:\n#{inspect(cnt)}")
     :ignoring
   end
 
