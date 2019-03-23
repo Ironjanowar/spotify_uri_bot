@@ -36,7 +36,14 @@ defmodule SpotifyUriBot.Bot do
           reply_to_message_id: message_id,
           reply_markup: result[:markup] || ""
         )
+
+      _ ->
+        :ok
     end
+  end
+
+  def handle(_, _) do
+    :ignoring
   end
 
   # Private
