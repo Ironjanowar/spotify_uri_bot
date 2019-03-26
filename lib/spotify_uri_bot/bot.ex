@@ -46,18 +46,14 @@ defmodule SpotifyUriBot.Bot do
   end
 
   # Admin commands
+  def handle({:callback_query, %{data: "stats:refresh"}}, %{extra: %{is_admin: true}} = context) do
+    {message, markup} = generate_stats_message()
+    edit(context, :inline, message, parse_mode: "Markdown", reply_markup: markup)
+  end
+
   def handle({:command, "stats", _}, %{extra: %{is_admin: true}} = context) do
-    %{users: users, groups: groups} = SpotifyUriBot.Stats.get_stats()
-    users_count = Enum.count(users)
-    groups_count = Enum.count(groups)
-
-    message = """
-    Number of users and groups that have used the bot:
-    Users:  *#{users_count}*
-    Groups: *#{groups_count}*
-    """
-
-    answer(context, message, parse_mode: "Markdown")
+    {message, markup} = generate_stats_message()
+    answer(context, message, parse_mode: "Markdown", reply_markup: markup)
   end
 
   def handle(_, cnt) do
@@ -66,6 +62,34 @@ defmodule SpotifyUriBot.Bot do
   end
 
   # Private
+  defp pad_lead(num) do
+    num
+    |> to_string()
+    |> String.pad_leading(2, "0")
+  end
+
+  defp generate_stats_message() do
+    %{users: users, groups: groups} = SpotifyUriBot.Stats.get_stats()
+    users_count = Enum.count(users)
+    groups_count = Enum.count(groups)
+    {:ok, date} = DateTime.now("Europe/Madrid")
+
+    day = [date.year, date.month, date.day] |> Enum.map(&pad_lead/1) |> Enum.join("-")
+    hour = [date.hour, date.minute, date.second] |> Enum.map(&pad_lead/1) |> Enum.join(":")
+
+    date_string = "#{day} #{hour}"
+
+    message = """
+    Number of users and groups that have used the bot (_#{date_string}_):
+    Users:  *#{users_count}*
+    Groups: *#{groups_count}*
+    """
+
+    markup = ExGram.Dsl.create_inline([[[text: "Refresh", callback_data: "stats:refresh"]]])
+
+    {message, markup}
+  end
+
   defp generate_inline_options(text) do
     case generate_message(text) do
       {:ok, %{info: %{preview_url: preview_url}} = result} when not is_nil(preview_url) ->

@@ -8,3 +8,5 @@ config :ex_gram,
 config :spotify_uri_bot,
   client_token: {:system, "CLIENT_TOKEN"},
   admins: []
+
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase

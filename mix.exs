@@ -27,7 +27,8 @@ defmodule SpotifyUriBot.MixProject do
       {:jason, "~> 1.1"},
       {:nimble_parsec, "~> 0.2"},
       {:distillery, "~> 2.0"},
-      {:redix, ">= 0.0.0"}
+      {:redix, ">= 0.0.0"},
+      {:tzdata, "~> 1.0.0-rc.0"}
     ]
   end
 end
