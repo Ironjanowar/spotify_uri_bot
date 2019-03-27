@@ -23,14 +23,35 @@ defmodule SpotifyUriBot.Cron do
     case state[:stats] do
       nil ->
         stats = SpotifyUriBot.Stats.get_stats()
+        stats_message = SpotifyUriBot.Bot.generate_stats_message(stats)
 
         # Notify admins
+        ExGram.Config.get(:spotify_uri_bot, :admins, [])
+        |> Enum.map(fn admin ->
+          ExGram.send_message(admin, stats_message, parse_mode: "Markdown")
+        end)
 
-        {:noreply, Map.put(:stats, stats)}
+        {:noreply, Map.put(state, :stats, stats)}
 
       stats ->
-        new_stats = SpotifyUriBot.Stats.get_stats()
-        {:noreply, new_stats}
+        %{users: users, groups: groups} = new_stats = SpotifyUriBot.Stats.get_stats()
+
+        cond do
+          Enum.count(users) == Enum.count(stats[:users]) &&
+              Enum.count(groups) == Enum.count(stats[:groups]) ->
+            {:noreply, stats}
+
+          true ->
+            stats_message = SpotifyUriBot.Bot.generate_stats_message(new_stats)
+
+            # Notify admins
+            ExGram.Config.get(:spotify_uri_bot, :admins, [])
+            |> Enum.map(fn admin ->
+              ExGram.send_message(admin, stats_message, parse_mode: "Markdown")
+            end)
+
+            {:noreply, Map.put(state, :stats, new_stats)}
+        end
     end
   end
 end

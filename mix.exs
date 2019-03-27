@@ -28,7 +28,6 @@ defmodule SpotifyUriBot.MixProject do
       {:nimble_parsec, "~> 0.2"},
       {:distillery, "~> 2.0"},
       {:redix, ">= 0.0.0"},
-      {:tzdata, "~> 1.0.0-rc.0"},
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"}
     ]

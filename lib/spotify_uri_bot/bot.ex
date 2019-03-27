@@ -61,18 +61,12 @@ defmodule SpotifyUriBot.Bot do
     :ignoring
   end
 
-  # Private
-  defp pad_lead(num) do
-    num
-    |> to_string()
-    |> String.pad_leading(2, "0")
-  end
+  def generate_stats_message(), do: SpotifyUriBot.Stats.get_stats() |> generate_stats_message()
 
-  defp generate_stats_message() do
-    %{users: users, groups: groups} = SpotifyUriBot.Stats.get_stats()
+  def generate_stats_message(%{users: users, groups: groups}) do
     users_count = Enum.count(users)
     groups_count = Enum.count(groups)
-    {:ok, date} = DateTime.now("Europe/Madrid")
+    date = Timex.now("Europe/Madrid")
 
     day = [date.year, date.month, date.day] |> Enum.map(&pad_lead/1) |> Enum.join("-")
     hour = [date.hour, date.minute, date.second] |> Enum.map(&pad_lead/1) |> Enum.join(":")
@@ -88,6 +82,13 @@ defmodule SpotifyUriBot.Bot do
     markup = ExGram.Dsl.create_inline([[[text: "Refresh", callback_data: "stats:refresh"]]])
 
     {message, markup}
+  end
+
+  # Private
+  defp pad_lead(num) do
+    num
+    |> to_string()
+    |> String.pad_leading(2, "0")
   end
 
   defp generate_inline_options(text) do
