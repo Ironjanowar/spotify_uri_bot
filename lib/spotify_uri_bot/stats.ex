@@ -2,10 +2,7 @@ defmodule SpotifyUriBot.Stats do
   use GenServer
 
   def child_spec(_) do
-    %{
-      id: __MODULE__,
-      start: {__MODULE__, :start_link, []}
-    }
+    %{id: __MODULE__, start: {__MODULE__, :start_link, []}}
   end
 
   # Client API
