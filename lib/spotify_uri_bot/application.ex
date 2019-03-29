@@ -12,6 +12,8 @@ defmodule SpotifyUriBot.Application do
       SpotifyUriBot.Server,
       SpotifyUriBot.Stats,
       {Redix, [host: "localhost", port: 6379, name: :redix]},
+      SpotifyUriBot.Cron,
+      SpotifyUriBot.Scheduler,
       {SpotifyUriBot.Bot, [method: :polling, token: token]}
     ]
 

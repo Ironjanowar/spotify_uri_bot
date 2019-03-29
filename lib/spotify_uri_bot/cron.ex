@@ -1,6 +1,8 @@
 defmodule SpotifyUriBot.Cron do
   use GenServer
 
+  require Logger
+
   def child_spec(_) do
     %{id: __MODULE__, start: {__MODULE__, :start_link, []}}
   end
@@ -20,34 +22,47 @@ defmodule SpotifyUriBot.Cron do
   end
 
   def handle_cast(:check_stats, state) do
+    Logger.debug("Checking stats")
+
     case state[:stats] do
       nil ->
         stats = SpotifyUriBot.Stats.get_stats()
-        stats_message = SpotifyUriBot.Bot.generate_stats_message(stats)
+        {stats_message, markup} = SpotifyUriBot.Bot.generate_stats_message(stats)
 
         # Notify admins
         ExGram.Config.get(:spotify_uri_bot, :admins, [])
         |> Enum.map(fn admin ->
-          ExGram.send_message(admin, stats_message, parse_mode: "Markdown")
+          Logger.debug("Notifying admin: #{inspect(admin)}")
+
+          ExGram.send_message(admin, stats_message, parse_mode: "Markdown", reply_markup: markup)
         end)
 
-        {:noreply, Map.put(state, :stats, stats)}
+        new_state = Map.put(state, :stats, stats)
+
+        Logger.debug("No previous state, putting state: #{inspect(stats)}")
+
+        {:noreply, new_state}
 
       stats ->
+        Logger.debug("Existing stats: #{inspect(stats)}")
         %{users: users, groups: groups} = new_stats = SpotifyUriBot.Stats.get_stats()
 
         cond do
           Enum.count(users) == Enum.count(stats[:users]) &&
               Enum.count(groups) == Enum.count(stats[:groups]) ->
-            {:noreply, stats}
+            Logger.debug("Stats are the same, no notification")
+            {:noreply, state}
 
           true ->
-            stats_message = SpotifyUriBot.Bot.generate_stats_message(new_stats)
+            {stats_message, markup} = SpotifyUriBot.Bot.generate_stats_message(new_stats)
 
             # Notify admins
             ExGram.Config.get(:spotify_uri_bot, :admins, [])
             |> Enum.map(fn admin ->
-              ExGram.send_message(admin, stats_message, parse_mode: "Markdown")
+              ExGram.send_message(admin, stats_message,
+                parse_mode: "Markdown",
+                reply_markup: markup
+              )
             end)
 
             {:noreply, Map.put(state, :stats, new_stats)}

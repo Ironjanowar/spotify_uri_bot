@@ -10,13 +10,15 @@ config :spotify_uri_bot,
   admins: []
 
 config :spotify_uri_bot, SpotifyUriBot.Scheduler,
+  timezone: "Europe/Madrid",
   jobs: [
     # Runs every midnight:
-    {"@daily", {SpotifyUriBot.Cron, :check_stats, []}}
+    {"0 9 * * *", {SpotifyUriBot.Cron, :check_stats, []}}
   ]
 
 config :logger,
   level: :debug,
+  truncate: :infinity,
   backends: [{LoggerFileBackend, :debug}, {LoggerFileBackend, :error}]
 
 config :logger, :debug,
