@@ -35,4 +35,10 @@ release: deps compile
 debug: token
 	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot console
 
+error_logs:
+	tail -n 20 -f _build/dev/rel/spotify_uri_bot/log/error.log
+
+debug_logs:
+	tail -n 20 -f _build/dev/rel/spotify_uri_bot/log/debug.log
+
 .PHONY: deps compile release start clean purge token iex stop attach debug

@@ -29,7 +29,8 @@ defmodule SpotifyUriBot.MixProject do
       {:distillery, "~> 2.0"},
       {:redix, ">= 0.0.0"},
       {:quantum, "~> 2.3"},
-      {:timex, "~> 3.0"}
+      {:timex, "~> 3.0"},
+      {:logger_file_backend, "0.0.10"}
     ]
   end
 end

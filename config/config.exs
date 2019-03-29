@@ -14,3 +14,17 @@ config :spotify_uri_bot, SpotifyUriBot.Scheduler,
     # Runs every midnight:
     {"@daily", {SpotifyUriBot.Cron, :check_stats, []}}
   ]
+
+config :logger,
+  level: :debug,
+  backends: [{LoggerFileBackend, :debug}, {LoggerFileBackend, :error}]
+
+config :logger, :debug,
+  path: "log/debug.log",
+  level: :debug,
+  format: "$dateT$timeZ [$level] $message\n"
+
+config :logger, :error,
+  path: "log/error.log",
+  level: :error,
+  format: "$dateT$timeZ [$level] $message\n"
