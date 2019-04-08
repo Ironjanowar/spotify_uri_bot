@@ -62,10 +62,21 @@ defmodule SpotifyUriBot.Api do
       "artists" => [%{"name" => artist} | _],
       "release_date" => release_date,
       "external_urls" => %{"spotify" => href},
-      "uri" => uri
+      "uri" => uri,
+      "tracks" => %{"items" => tracks}
     } = Jason.decode!(body)
 
-    {:ok, %{artist: artist, name: album_name, release_date: release_date, href: href, uri: uri}}
+    tracks = Enum.map(tracks, &SpotifyUriBot.Utils.extract_tracks_info/1)
+
+    {:ok,
+     %{
+       artist: artist,
+       name: album_name,
+       release_date: release_date,
+       href: href,
+       uri: uri,
+       tracks: tracks
+     }}
   end
 
   def get_artist(artist_id, token) do

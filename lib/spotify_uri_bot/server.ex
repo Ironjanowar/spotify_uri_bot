@@ -71,19 +71,7 @@ defmodule SpotifyUriBot.Server do
 
     case Jason.decode(body) do
       {:ok, %{"tracks" => %{"items" => items}}} ->
-        tracks =
-          Enum.map(items, fn item ->
-            [artist | _] = item["artists"]
-
-            %{
-              name: item["name"],
-              album: item["album"]["name"],
-              artist: artist["name"],
-              href: item["external_urls"]["spotify"],
-              uri: item["uri"],
-              preview_url: item["preview_url"]
-            }
-          end)
+        tracks = Enum.map(items, &SpotifyUriBot.Utils.extract_tracks_info/1)
 
         Logger.debug("Tracks result:\n#{inspect(tracks)}")
         {:reply, {:ok, tracks}, state}

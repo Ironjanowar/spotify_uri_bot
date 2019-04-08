@@ -111,4 +111,17 @@ defmodule SpotifyUriBot.Utils do
       reply_markup: markup
     }
   end
+
+  def extract_tracks_info(track) do
+    [artist | _] = track["artists"]
+
+    %{
+      name: track["name"],
+      album: track["album"]["name"],
+      artist: artist["name"],
+      href: track["external_urls"]["spotify"],
+      uri: track["uri"],
+      preview_url: track["preview_url"]
+    }
+  end
 end

@@ -112,6 +112,28 @@ defmodule SpotifyUriBot.Bot do
            }
          ]}
 
+      {:ok, %{entity: "Album"} = result} ->
+        Logger.debug("Generating article: #{inspect(result)}")
+
+        album_article = [
+          %InlineQueryResultArticle{
+            type: "article",
+            id: result[:info][:uri],
+            title: "Share" <> (" #{result[:entity]}" || ""),
+            input_message_content: %InputTextMessageContent{
+              message_text: result[:message],
+              parse_mode: "Markdown"
+            },
+            reply_markup: result[:markup],
+            description: result[:info][:name] || ""
+          }
+        ]
+
+        track_articles =
+          Enum.map(result[:info][:tracks], &SpotifyUriBot.Utils.search_result_to_result_audio/1)
+
+        {:ok, album_article ++ track_articles}
+
       {:ok, result} ->
         Logger.debug("Generating article: #{inspect(result)}")
 
