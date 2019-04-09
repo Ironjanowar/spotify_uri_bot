@@ -192,7 +192,7 @@ defmodule SpotifyUriBot.Bot do
         🔗 URI: `#{album[:uri]}`
         """
 
-        markup = SpotifyUriBot.Utils.generate_url_button(album[:href])
+        markup = SpotifyUriBot.Utils.generate_url_buttons(album[:href], album[:uri])
         {:ok, %{message: message, markup: markup, info: album, entity: "Album"}}
 
       {:ok, :artist, uri} ->
