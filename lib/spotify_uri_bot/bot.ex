@@ -134,6 +134,31 @@ defmodule SpotifyUriBot.Bot do
 
         {:ok, album_article ++ track_articles}
 
+      {:ok, %{entity: "Artist"} = result} ->
+        Logger.debug("Generating article: #{inspect(result)}")
+
+        artist_article = [
+          %InlineQueryResultArticle{
+            type: "article",
+            id: result[:info][:uri],
+            title: "Share" <> (" #{result[:entity]}" || ""),
+            input_message_content: %InputTextMessageContent{
+              message_text: result[:message],
+              parse_mode: "Markdown"
+            },
+            reply_markup: result[:markup],
+            description: result[:info][:name] || ""
+          }
+        ]
+
+        top_tracks_articles =
+          Enum.map(
+            result[:info][:top_tracks],
+            &SpotifyUriBot.Utils.search_result_to_result_audio/1
+          )
+
+        {:ok, artist_article ++ top_tracks_articles}
+
       {:ok, result} ->
         Logger.debug("Generating article: #{inspect(result)}")
 
@@ -203,7 +228,7 @@ defmodule SpotifyUriBot.Bot do
         🔗 URI: `#{artist[:uri]}`
         """
 
-        markup = SpotifyUriBot.Utils.generate_url_button(artist[:href])
+        markup = SpotifyUriBot.Utils.generate_url_buttons(artist[:href], artist[:uri])
 
         {:ok, %{message: message, markup: markup, info: artist, entity: "Artist"}}
 

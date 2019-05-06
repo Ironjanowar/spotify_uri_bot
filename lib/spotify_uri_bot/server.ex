@@ -55,6 +55,8 @@ defmodule SpotifyUriBot.Server do
   def handle_call({:artist, artist_id}, _from, state) do
     {:ok, token} = SpotifyUriBot.Api.get_token()
     {:ok, artist_info} = SpotifyUriBot.Api.get_artist(artist_id, token)
+    {:ok, top_tracks} = SpotifyUriBot.Api.get_artist_top_tracks(artist_id, token)
+    artist_info = Map.put(artist_info, :top_tracks, top_tracks)
     {:reply, {:ok, artist_info}, state}
   end
 

@@ -87,6 +87,19 @@ defmodule SpotifyUriBot.Api do
     {:ok, %{name: name, href: href, uri: uri}}
   end
 
+  def get_artist_top_tracks(artist_id, token) do
+    {:ok, %{body: body}} =
+      token
+      |> authorized_client()
+      |> get("/artists/#{artist_id}/top-tracks", query: [country: "ES"])
+
+    %{"tracks" => tracks} = Jason.decode!(body)
+
+    tracks = Enum.map(tracks, &SpotifyUriBot.Utils.extract_tracks_info/1)
+
+    {:ok, tracks}
+  end
+
   def get_playlist(playlist_id, token) do
     {:ok, %{body: body}} = token |> authorized_client() |> get("/playlists/#{playlist_id}")
 
