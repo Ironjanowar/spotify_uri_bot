@@ -11,7 +11,7 @@ export BOT_TOKEN = $(shell cat bot.token)
 export CLIENT_TOKEN = $(shell cat client.token)
 
 start: token
-	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot start
+	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot daemon
 
 iex: token
 	iex -S mix
