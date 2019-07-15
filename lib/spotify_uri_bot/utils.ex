@@ -125,4 +125,14 @@ defmodule SpotifyUriBot.Utils do
       preview_url: track["preview_url"]
     }
   end
+
+  def hashtags([]), do: ""
+
+  def hashtags(genres) do
+    "🎸 Genres: " <>
+      (Enum.map(genres, fn genre ->
+         "#" <> (genre |> String.replace(~r/-| /, ""))
+       end)
+       |> Enum.join(" "))
+  end
 end

@@ -210,12 +210,13 @@ defmodule SpotifyUriBot.Bot do
       {:ok, :album, uri} ->
         {:ok, album} = SpotifyUriBot.Server.get_album(uri)
 
-        message = """
-        🎤 Artist: `#{album[:artist]}`
-        📀 Album: `#{album[:name]}`
-        📅 Release date: `#{album[:release_date]}`
-        🔗 URI: `#{album[:uri]}`
-        """
+        message =
+          """
+          🎤 Artist: `#{album[:artist]}`
+          📀 Album: `#{album[:name]}`
+          📅 Release date: `#{album[:release_date]}`
+          🔗 URI: `#{album[:uri]}`
+          """ <> SpotifyUriBot.Utils.hashtags(album[:genres])
 
         markup = SpotifyUriBot.Utils.generate_url_buttons(album[:href], album[:uri])
         {:ok, %{message: message, markup: markup, info: album, entity: "Album"}}
@@ -223,10 +224,11 @@ defmodule SpotifyUriBot.Bot do
       {:ok, :artist, uri} ->
         {:ok, artist} = SpotifyUriBot.Server.get_artist(uri)
 
-        message = """
-        🎤 Artist: `#{artist[:name]}`
-        🔗 URI: `#{artist[:uri]}`
-        """
+        message =
+          """
+          🎤 Artist: `#{artist[:name]}`
+          🔗 URI: `#{artist[:uri]}`
+          """ <> SpotifyUriBot.Utils.hashtags(artist[:genres])
 
         markup = SpotifyUriBot.Utils.generate_url_buttons(artist[:href], artist[:uri])
 
