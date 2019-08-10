@@ -145,7 +145,27 @@ defmodule SpotifyUriBot.Api do
   def get_episode(episode_id, token) do
     {:ok, %{body: body}} = token |> authorized_client() |> get("/episodes/#{episode_id}")
 
-    {:ok, Jason.decode!(body)}
+    %{
+      "name" => name,
+      "show" => %{"name" => show, "publisher" => publisher},
+      "description" => description,
+      "language" => language,
+      "uri" => uri,
+      "audio_preview_url" => preview_url,
+      "external_urls" => %{"spotify" => href}
+    } = Jason.decode!(body)
+
+    {:ok,
+     %{
+       name: name,
+       publisher: publisher,
+       show: show,
+       description: description,
+       language: language,
+       uri: uri,
+       preview_url: preview_url,
+       href: href
+     }}
   end
 
   def search(query, types, token) do

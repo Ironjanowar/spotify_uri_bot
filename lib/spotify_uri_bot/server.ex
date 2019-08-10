@@ -37,6 +37,10 @@ defmodule SpotifyUriBot.Server do
     GenServer.call(__MODULE__, {:show, show_id})
   end
 
+  def get_episode(episode_id) do
+    GenServer.call(__MODULE__, {:episode, episode_id})
+  end
+
   def search(query) do
     GenServer.call(__MODULE__, {:search, query})
   end
@@ -76,6 +80,12 @@ defmodule SpotifyUriBot.Server do
     {:ok, token} = Api.get_token()
     {:ok, show_info} = Api.get_show(show_id, token)
     {:reply, {:ok, show_info}, state}
+  end
+
+  def handle_call({:episode, episode_id}, _from, state) do
+    {:ok, token} = Api.get_token()
+    {:ok, episode_info} = Api.get_episode(episode_id, token)
+    {:reply, {:ok, episode_info}, state}
   end
 
   def handle_call({:search, query}, _from, state) do

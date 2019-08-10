@@ -259,13 +259,30 @@ defmodule SpotifyUriBot.Bot do
         message = """
         📄 Name: `#{show[:name]}`
         👤 Publisher: `#{show[:publisher]}`
+        🌐 Languages: `#{Enum.join(show[:languages], ", ")}`
+        #️⃣ Number of episodes: `#{show[:episodes]}`
         🔗 URI: `#{show[:uri]}`
         📗 Description:
-        _#{show[:description]}_
+        `#{show[:description]}`
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(show[:href])
         {:ok, %{message: message, markup: markup, info: show, entity: "Show"}}
+
+      {:ok, :episode, uri} ->
+        {:ok, episode} = SpotifyUriBot.Server.get_episode(uri)
+
+        message = """
+        📄 Name: `#{episode[:name]}`
+        👤 Publisher: `#{episode[:publisher]}`
+        🌐 Languages: `#{episode[:language]}`
+        🔗 URI: `#{episode[:uri]}`
+        📗 Description:
+        `#{episode[:description]}`
+        """
+
+        markup = SpotifyUriBot.Utils.generate_url_buttons(episode[:href], episode[:uri])
+        {:ok, %{message: message, markup: markup, info: episode, entity: "Episode"}}
 
       {:error, message} ->
         Logger.debug(message)
