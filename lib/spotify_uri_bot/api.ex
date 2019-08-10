@@ -117,6 +117,37 @@ defmodule SpotifyUriBot.Api do
     {:ok, %{name: name, owner: owner, description: description, href: href, uri: uri}}
   end
 
+  def get_show(show_id, token) do
+    {:ok, %{body: body}} = token |> authorized_client() |> get("/shows/#{show_id}")
+
+    %{
+      "name" => name,
+      "publisher" => publisher,
+      "description" => description,
+      "external_urls" => %{"spotify" => href},
+      "uri" => uri,
+      "languages" => languages,
+      "episodes" => %{"total" => episodes}
+    } = Jason.decode!(body)
+
+    {:ok,
+     %{
+       name: name,
+       publisher: publisher,
+       description: description,
+       href: href,
+       uri: uri,
+       languages: languages,
+       episodes: episodes
+     }}
+  end
+
+  def get_episode(episode_id, token) do
+    {:ok, %{body: body}} = token |> authorized_client() |> get("/episodes/#{episode_id}")
+
+    {:ok, Jason.decode!(body)}
+  end
+
   def search(query, types, token) do
     types = Enum.join(types, ",")
     params = [q: URI.encode(query), type: types, limit: 5]

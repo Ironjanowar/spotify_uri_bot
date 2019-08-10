@@ -15,7 +15,9 @@ defmodule SpotifyUriBot.Utils do
       ignore(string("user:"))
       |> ignore(ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1))
       |> ignore(string(":"))
-      |> string("playlist")
+      |> string("playlist"),
+      string("show"),
+      string("episode")
     ])
     |> ignore(string(":"))
     |> ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1)
@@ -29,7 +31,9 @@ defmodule SpotifyUriBot.Utils do
       ignore(string("user/"))
       |> ignore(ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1))
       |> ignore(string("/"))
-      |> string("playlist")
+      |> string("playlist"),
+      string("show"),
+      string("episode")
     ])
     |> ignore(string("/"))
     |> ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1)

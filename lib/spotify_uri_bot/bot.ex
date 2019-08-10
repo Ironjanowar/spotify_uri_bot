@@ -253,6 +253,20 @@ defmodule SpotifyUriBot.Bot do
         markup = SpotifyUriBot.Utils.generate_url_button(playlist[:href])
         {:ok, %{message: message, markup: markup, info: playlist, entity: "Playlist"}}
 
+      {:ok, :show, uri} ->
+        {:ok, show} = SpotifyUriBot.Server.get_show(uri)
+
+        message = """
+        📄 Name: `#{show[:name]}`
+        👤 Publisher: `#{show[:publisher]}`
+        🔗 URI: `#{show[:uri]}`
+        📗 Description:
+        _#{show[:description]}_
+        """
+
+        markup = SpotifyUriBot.Utils.generate_url_button(show[:href])
+        {:ok, %{message: message, markup: markup, info: show, entity: "Show"}}
+
       {:error, message} ->
         Logger.debug(message)
         :no_uri

@@ -3,6 +3,8 @@ defmodule SpotifyUriBot.Server do
 
   require Logger
 
+  alias SpotifyUriBot.Api
+
   def child_spec(_) do
     %{
       id: __MODULE__,
@@ -31,6 +33,10 @@ defmodule SpotifyUriBot.Server do
     GenServer.call(__MODULE__, {:playlist, playlist_id})
   end
 
+  def get_show(show_id) do
+    GenServer.call(__MODULE__, {:show, show_id})
+  end
+
   def search(query) do
     GenServer.call(__MODULE__, {:search, query})
   end
@@ -41,35 +47,41 @@ defmodule SpotifyUriBot.Server do
   end
 
   def handle_call({:track, track_id}, _from, state) do
-    {:ok, token} = SpotifyUriBot.Api.get_token()
-    {:ok, track_info} = SpotifyUriBot.Api.get_track(track_id, token)
+    {:ok, token} = Api.get_token()
+    {:ok, track_info} = Api.get_track(track_id, token)
     {:reply, {:ok, track_info}, state}
   end
 
   def handle_call({:album, album_id}, _from, state) do
-    {:ok, token} = SpotifyUriBot.Api.get_token()
-    {:ok, album_info} = SpotifyUriBot.Api.get_album(album_id, token)
+    {:ok, token} = Api.get_token()
+    {:ok, album_info} = Api.get_album(album_id, token)
     {:reply, {:ok, album_info}, state}
   end
 
   def handle_call({:artist, artist_id}, _from, state) do
-    {:ok, token} = SpotifyUriBot.Api.get_token()
-    {:ok, artist_info} = SpotifyUriBot.Api.get_artist(artist_id, token)
-    {:ok, top_tracks} = SpotifyUriBot.Api.get_artist_top_tracks(artist_id, token)
+    {:ok, token} = Api.get_token()
+    {:ok, artist_info} = Api.get_artist(artist_id, token)
+    {:ok, top_tracks} = Api.get_artist_top_tracks(artist_id, token)
     artist_info = Map.put(artist_info, :top_tracks, top_tracks)
     {:reply, {:ok, artist_info}, state}
   end
 
   def handle_call({:playlist, playlist_id}, _from, state) do
-    {:ok, token} = SpotifyUriBot.Api.get_token()
-    {:ok, playlist_info} = SpotifyUriBot.Api.get_playlist(playlist_id, token)
+    {:ok, token} = Api.get_token()
+    {:ok, playlist_info} = Api.get_playlist(playlist_id, token)
     {:reply, {:ok, playlist_info}, state}
+  end
+
+  def handle_call({:show, show_id}, _from, state) do
+    {:ok, token} = Api.get_token()
+    {:ok, show_info} = Api.get_show(show_id, token)
+    {:reply, {:ok, show_info}, state}
   end
 
   def handle_call({:search, query}, _from, state) do
     Logger.debug("Searching #{query}")
-    {:ok, token} = SpotifyUriBot.Api.get_token()
-    {:ok, %{body: body}} = SpotifyUriBot.Api.search(query, [:track], token)
+    {:ok, token} = Api.get_token()
+    {:ok, %{body: body}} = Api.search(query, [:track], token)
 
     case Jason.decode(body) do
       {:ok, %{"tracks" => %{"items" => items}}} ->
