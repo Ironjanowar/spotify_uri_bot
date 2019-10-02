@@ -35,13 +35,15 @@ defmodule SpotifyUriBot.Api do
     {:ok, %{body: body}} = token |> authorized_client() |> get("/tracks/#{track_id}")
 
     %{
-      "artists" => [%{"name" => artist} | _],
+      "artists" => [%{"name" => artist, "id" => artist_id} | _],
       "album" => %{"name" => album_name},
       "name" => song_name,
       "external_urls" => %{"spotify" => href},
       "uri" => uri,
       "preview_url" => preview_url
     } = Jason.decode!(body)
+
+    {:ok, %{genres: genres}} = get_artist(artist_id, token)
 
     {:ok,
      %{
@@ -50,7 +52,8 @@ defmodule SpotifyUriBot.Api do
        name: song_name,
        href: href,
        uri: uri,
-       preview_url: preview_url
+       preview_url: preview_url,
+       genres: genres
      }}
   end
 
