@@ -13,7 +13,7 @@ defmodule SpotifyUriBot.Utils do
       string("artist"),
       string("playlist"),
       ignore(string("user:"))
-      |> ignore(ascii_string([?a..?z, ?A..?Z, ?0..?9], min: 1))
+      |> ignore(ascii_string([?a..?z, ?A..?Z, ?0..?9, ?., ?-, ?_], min: 1))
       |> ignore(string(":"))
       |> string("playlist"),
       string("show"),
