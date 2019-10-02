@@ -192,12 +192,13 @@ defmodule SpotifyUriBot.Bot do
       {:ok, :track, uri} ->
         {:ok, track} = SpotifyUriBot.Server.get_track(uri)
 
-        message = """
-        🎤 Artist: `#{track[:artist]}`
-        🎵 Song: `#{track[:name]}`
-        📀 Album: `#{track[:album]}`
-        🔗 URI: `#{track[:uri]}`
-        """
+        message =
+          """
+          🎤 Artist: `#{track[:artist]}`
+          🎵 Song: `#{track[:name]}`
+          📀 Album: `#{track[:album]}`
+          🔗 URI: `#{track[:uri]}`
+          """ <> SpotifyUriBot.Utils.hashtags(track[:genres])
 
         markup =
           case track[:preview_url] do
