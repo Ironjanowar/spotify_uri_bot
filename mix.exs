@@ -22,14 +22,15 @@ defmodule SpotifyUriBot.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_gram, "~> 0.7.1"},
+      {:ex_gram, "~> 0.8"},
       {:tesla, "~> 1.2.1"},
+      {:gun, "~> 1.3"},
       {:jason, "~> 1.1"},
       {:nimble_parsec, "~> 0.2"},
       {:redix, ">= 0.0.0"},
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
-      {:logger_file_backend, "0.0.10"}
+      {:logger_file_backend, "0.0.11"}
     ]
   end
 end

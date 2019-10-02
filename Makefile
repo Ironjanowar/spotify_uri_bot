@@ -27,7 +27,7 @@ stop:
 	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot stop
 
 attach:
-	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot attach
+	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot remote
 
 release: deps compile
 	mix release
@@ -36,9 +36,9 @@ debug: token
 	_build/dev/rel/spotify_uri_bot/bin/spotify_uri_bot console
 
 error_logs:
-	tail -n 20 -f _build/dev/rel/spotify_uri_bot/log/error.log
+	tail -n 20 -f log/error.log
 
 debug_logs:
-	tail -n 20 -f _build/dev/rel/spotify_uri_bot/log/debug.log
+	tail -n 20 -f log/debug.log
 
 .PHONY: deps compile release start clean purge token iex stop attach debug
