@@ -25,6 +25,9 @@ spotify_uri_bot-*.tar
 # Ignore tokens
 *.token
 
+# Ignore logs folder
+log/
+
 
 # Created by https://www.gitignore.io/api/emacs
 # Edit at https://www.gitignore.io/?templates=emacs
