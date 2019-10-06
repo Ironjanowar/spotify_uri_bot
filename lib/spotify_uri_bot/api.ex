@@ -26,17 +26,15 @@ defmodule SpotifyUriBot.Api do
   def get_token() do
     client_token = ExGram.Config.get(:spotify_uri_bot, :client_token)
 
-    {:ok, %{body: body}} =
-      client_token |> client() |> post("/api/token", %{grant_type: "client_credentials"})
-
-    case Jason.decode!(body) do
-      %{"access_token" => token} ->
-        Logger.debug("Spotify token obtained")
-        {:ok, token}
-
+    with {:ok, %{body: body}} <-
+           client_token |> client() |> post("/api/token", %{grant_type: "client_credentials"}),
+         %{"access_token" => token} <- Jason.decode!(body) do
+      Logger.debug("Spotify token gathered.")
+      {:ok, token}
+    else
       err ->
         err |> inspect |> Logger.error()
-        Logger.error("Retrying the get_token...")
+        Logger.error("Token gathering failed retrying...")
         get_token()
     end
   end
