@@ -3,6 +3,8 @@ defmodule SpotifyUriBot.Api do
 
   plug(Tesla.Middleware.FormUrlencoded)
 
+  require Logger
+
   def client(client_token) do
     middlewares = [
       {Tesla.Middleware.BaseUrl, "https://accounts.spotify.com"},
@@ -27,8 +29,16 @@ defmodule SpotifyUriBot.Api do
     {:ok, %{body: body}} =
       client_token |> client() |> post("/api/token", %{grant_type: "client_credentials"})
 
-    %{"access_token" => token} = Jason.decode!(body)
-    {:ok, token}
+    case Jason.decode!(body) do
+      %{"access_token" => token} ->
+        Logger.debug("Spotify token obtained")
+        {:ok, token}
+
+      err ->
+        err |> inspect |> Logger.error()
+        Logger.error("Retrying the get_token...")
+        get_token()
+    end
   end
 
   def get_track(track_id, token) do
