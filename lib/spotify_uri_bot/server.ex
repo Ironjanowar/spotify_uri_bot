@@ -91,10 +91,10 @@ defmodule SpotifyUriBot.Server do
   def handle_call({:search, query}, _from, state) do
     Logger.debug("Searching #{query}")
     {:ok, token} = Api.get_token()
-    {:ok, %{body: body}} = Api.search(query, [:track], token)
+    {:ok, search_result} = Api.search(query, [:track], token)
 
-    case Jason.decode(body) do
-      {:ok, %{"tracks" => %{"items" => items}}} ->
+    case search_result do
+      %{"tracks" => %{"items" => items}} ->
         tracks = Enum.map(items, &SpotifyUriBot.Utils.extract_tracks_info/1)
 
         Logger.debug("Tracks result:\n#{inspect(tracks)}")
