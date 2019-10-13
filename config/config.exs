@@ -10,8 +10,6 @@ config :ex_gram, ExGram.Adapter.Tesla,
     {SpotifyUriBot.TeslaMiddlewares, :retry, []}
   ]
 
-# config :tesla, adapter: Tesla.Adapter.Gun
-
 config :spotify_uri_bot,
   client_token: {:system, "CLIENT_TOKEN"},
   admins: []
