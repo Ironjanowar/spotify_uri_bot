@@ -22,7 +22,7 @@ defmodule SpotifyUriBot.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_gram, github: "rockneurotiko/ex_gram"},
+      {:ex_gram, "~> 0.8.1"},
       {:tesla, "~> 1.2.1"},
       {:gun, "~> 1.3"},
       {:jason, "~> 1.1"},
