@@ -206,6 +206,7 @@ defmodule SpotifyUriBot.Bot do
             _ -> SpotifyUriBot.Utils.generate_url_buttons(track[:href], track[:uri])
           end
 
+        Logger.debug("Message generated for #{uri}")
         {:ok, %{message: message, markup: markup, info: track, entity: "Track"}}
 
       {:ok, :album, uri} ->
@@ -220,6 +221,7 @@ defmodule SpotifyUriBot.Bot do
           """ <> SpotifyUriBot.Utils.hashtags(album[:genres])
 
         markup = SpotifyUriBot.Utils.generate_url_buttons(album[:href], album[:uri])
+        Logger.debug("Message generated for #{uri}")
         {:ok, %{message: message, markup: markup, info: album, entity: "Album"}}
 
       {:ok, :artist, uri} ->
@@ -233,6 +235,7 @@ defmodule SpotifyUriBot.Bot do
 
         markup = SpotifyUriBot.Utils.generate_url_buttons(artist[:href], artist[:uri])
 
+        Logger.debug("Message generated for #{uri}")
         {:ok, %{message: message, markup: markup, info: artist, entity: "Artist"}}
 
       {:ok, :playlist, uri} ->
@@ -252,6 +255,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(playlist[:href])
+        Logger.debug("Message generated for #{uri}")
         {:ok, %{message: message, markup: markup, info: playlist, entity: "Playlist"}}
 
       {:ok, :show, uri} ->
@@ -268,6 +272,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_button(show[:href])
+        Logger.debug("Message generated for #{uri}")
         {:ok, %{message: message, markup: markup, info: show, entity: "Show"}}
 
       {:ok, :episode, uri} ->
@@ -283,6 +288,7 @@ defmodule SpotifyUriBot.Bot do
         """
 
         markup = SpotifyUriBot.Utils.generate_url_buttons(episode[:href], episode[:uri])
+        Logger.debug("Message generated for #{uri}")
         {:ok, %{message: message, markup: markup, info: episode, entity: "Episode"}}
 
       {:error, message} ->

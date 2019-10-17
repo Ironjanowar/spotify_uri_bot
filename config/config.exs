@@ -5,6 +5,11 @@ use Mix.Config
 config :ex_gram,
   token: {:system, "BOT_TOKEN"}
 
+config :ex_gram, ExGram.Adapter.Tesla,
+  middlewares: [
+    {SpotifyUriBot.TeslaMiddlewares, :retry, []}
+  ]
+
 config :spotify_uri_bot,
   client_token: {:system, "CLIENT_TOKEN"},
   admins: []
