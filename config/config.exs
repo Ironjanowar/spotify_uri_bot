@@ -12,7 +12,8 @@ config :ex_gram, ExGram.Adapter.Tesla,
 
 config :spotify_uri_bot,
   client_token: {:system, "CLIENT_TOKEN"},
-  admins: []
+  admins: [],
+  port: {:system, "PORT"}
 
 config :spotify_uri_bot, SpotifyUriBot.Scheduler,
   timezone: "Europe/Madrid",

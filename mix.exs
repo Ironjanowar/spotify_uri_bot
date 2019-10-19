@@ -30,7 +30,10 @@ defmodule SpotifyUriBot.MixProject do
       {:redix, ">= 0.0.0"},
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
-      {:logger_file_backend, "0.0.11"}
+      {:logger_file_backend, "0.0.11"},
+      # Gigalixir
+      {:plug, "~> 1.7"},
+      {:plug_cowboy, "~> 2.0"}
     ]
   end
 end
