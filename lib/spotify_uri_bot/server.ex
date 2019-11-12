@@ -41,8 +41,10 @@ defmodule SpotifyUriBot.Server do
     GenServer.call(__MODULE__, {:episode, episode_id})
   end
 
-  def search(query) do
-    GenServer.call(__MODULE__, {:search, query})
+  def search(q, ""), do: search(q, :track)
+
+  def search(query, query_type) do
+    GenServer.call(__MODULE__, {:search, query, query_type})
   end
 
   # Server callbacks
@@ -88,19 +90,18 @@ defmodule SpotifyUriBot.Server do
     {:reply, {:ok, episode_info}, state}
   end
 
-  def handle_call({:search, query}, _from, state) do
-    Logger.debug("Searching #{query}")
+  def handle_call({:search, query, query_type}, _from, state) do
+    Logger.debug("Searching #{query} with query type #{inspect(query_type)}")
     {:ok, token} = Api.get_token()
-    {:ok, search_result} = Api.search(query, [:track], token)
+    {:ok, search_result} = Api.search(query, [query_type], token)
 
     case search_result do
-      %{"tracks" => %{"items" => items}} ->
-        tracks = Enum.map(items, &SpotifyUriBot.Utils.extract_tracks_info/1)
-
+      {:ok, {:tracks, tracks}} ->
         Logger.debug("Tracks result:\n#{inspect(tracks)}")
         {:reply, {:ok, tracks}, state}
 
       _ ->
+        Logger.warn("Nothing found for query: #{inspect(query)}")
         {:reply, {:ok, []}, state}
     end
   end
