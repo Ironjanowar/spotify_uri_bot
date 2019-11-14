@@ -156,6 +156,24 @@ defmodule SpotifyUriBot.Bot do
 
         {:ok, [episode_article]}
 
+      {:no_uri, text} ->
+        case SpotifyUriBot.Server.search(text) do
+          {:ok, _, {_, entity}} ->
+            entity_articles =
+              Enum.map(
+                entity,
+                &MessageFormatter.get_inline_article(&1,
+                  title: &1.title,
+                  description: &1.description
+                )
+              )
+
+            {:ok, entity_articles}
+
+          _ ->
+            :ignore
+        end
+
       _ ->
         :ignore
     end

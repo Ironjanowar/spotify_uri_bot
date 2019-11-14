@@ -4,6 +4,7 @@ defmodule SpotifyUriBot.Server do
   require Logger
 
   alias SpotifyUriBot.Api
+  alias SpotifyUriBot.Utils
 
   def child_spec(_) do
     %{
@@ -41,10 +42,8 @@ defmodule SpotifyUriBot.Server do
     GenServer.call(__MODULE__, {:episode, episode_id})
   end
 
-  def search(q, ""), do: search(q, :track)
-
-  def search(query, query_type) do
-    GenServer.call(__MODULE__, {:search, query, query_type})
+  def search(text) do
+    GenServer.call(__MODULE__, {:search, text})
   end
 
   # Server callbacks
@@ -90,19 +89,15 @@ defmodule SpotifyUriBot.Server do
     {:reply, {:ok, episode_info}, state}
   end
 
-  def handle_call({:search, query, query_type}, _from, state) do
-    Logger.debug("Searching #{query} with query type #{inspect(query_type)}")
-    {:ok, token} = Api.get_token()
-    {:ok, search_result} = Api.search(query, [query_type], token)
-
-    case search_result do
-      {:ok, {:tracks, tracks}} ->
-        Logger.debug("Tracks result:\n#{inspect(tracks)}")
-        {:reply, {:ok, tracks}, state}
-
-      _ ->
-        Logger.warn("Nothing found for query: #{inspect(query)}")
-        {:reply, {:ok, []}, state}
+  def handle_call({:search, text}, _from, state) do
+    with {search_type, search_query} <- Utils.get_search_type(text),
+         {:ok, token} <- Api.get_token(),
+         {:ok, search_result} <- Api.search(search_query, [search_type], token) do
+      {:reply, {:ok, search_type, search_result}, state}
+    else
+      err ->
+        Logger.error("Error while searching: #{inspect(err)}")
+        {:ok, []}
     end
   end
 end

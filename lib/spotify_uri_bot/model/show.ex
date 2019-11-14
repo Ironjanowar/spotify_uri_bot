@@ -1,6 +1,8 @@
 defmodule SpotifyUriBot.Model.Show do
   defstruct [:name, :publisher, :description, :href, :uri, :languages, :episodes]
 
+  require Logger
+
   def from_api(%{
         "name" => name,
         "publisher" => publisher,
@@ -23,5 +25,8 @@ defmodule SpotifyUriBot.Model.Show do
     {:ok, show}
   end
 
-  def from_api(_), do: :error
+  def from_api(error) do
+    Logger.error("Could not parse show #{inspect(error)}")
+    {:error, "Could not parse show"}
+  end
 end

@@ -140,7 +140,10 @@ defmodule SpotifyUriBot.Api do
     end
   end
 
+  def search("", _, _), do: :ignore
+
   def search(query, types, token) do
+    Logger.info("Searching '#{inspect(query)}' with types '#{inspect(types)}'")
     formatted_types = Enum.join(types, ",")
     params = [q: URI.encode(query), type: formatted_types, limit: 5]
 

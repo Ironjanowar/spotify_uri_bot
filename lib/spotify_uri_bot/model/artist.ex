@@ -1,6 +1,8 @@
 defmodule SpotifyUriBot.Model.Artist do
   defstruct [:name, :href, :uri, :genres]
 
+  require Logger
+
   def from_api(%{
         "name" => name,
         "external_urls" => %{"spotify" => href},
@@ -12,5 +14,8 @@ defmodule SpotifyUriBot.Model.Artist do
     {:ok, artist}
   end
 
-  def from_api(_), do: :error
+  def from_api(artist) do
+    Logger.error("Could not parse artist: #{inspect(artist)}")
+    {:error, "Could not parse artist"}
+  end
 end

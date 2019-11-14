@@ -1,6 +1,8 @@
 defmodule SpotifyUriBot.Model.Track do
   defstruct [:artist, :artist_id, :album, :name, :href, :uri, :preview_url, genres: []]
 
+  require Logger
+
   def from_api(%{
         "artists" => [%{"name" => artist, "id" => artist_id} | _],
         "album" => %{"name" => album_name},
@@ -22,7 +24,10 @@ defmodule SpotifyUriBot.Model.Track do
     {:ok, track}
   end
 
-  def from_api(_), do: :error
+  def from_api(error) do
+    Logger.error("Could not parse track: #{inspect(error)}")
+    {:error, "Could not parse track"}
+  end
 
   def from_top_tracks(%{
         "tracks" => tracks
