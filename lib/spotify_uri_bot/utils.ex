@@ -5,6 +5,8 @@ defmodule SpotifyUriBot.Utils do
   alias ExGram.Model.InlineQueryResultArticle
   alias ExGram.Model.InputTextMessageContent
 
+  require Logger
+
   uri_parse =
     ignore(string("spotify:"))
     |> choice([
@@ -150,6 +152,26 @@ defmodule SpotifyUriBot.Utils do
     case potential_type do
       "!" <> type -> {String.to_atom(type), Enum.join(query, " ")}
       _ -> {:track, search_query}
+    end
+  end
+
+  def retry_n(n, fa, time \\ 500)
+
+  def retry_n(n, {callback, args}, time) when n <= 0 do
+    Process.sleep(time)
+    apply(callback, args)
+  end
+
+  def retry_n(n, {callback, args}, time) do
+    Process.sleep(time)
+
+    case apply(callback, args) do
+      {:error, _} ->
+        Logger.error("Retrying...")
+        retry_n(n - 1, {callback, args}, time)
+
+      result ->
+        result
     end
   end
 end

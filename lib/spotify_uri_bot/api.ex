@@ -37,9 +37,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get token failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_token()
+        {:error, "Get token failed"}
     end
   end
 
@@ -52,9 +50,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get track failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_track(track_id, token)
+        {:error, "Get track failed"}
     end
   end
 
@@ -69,9 +65,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get album failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_album(album_id, token)
+        {:error, "Get album failed"}
     end
   end
 
@@ -82,9 +76,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get artist failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_artist(artist_id, token)
+        {:error, "Get artist failed"}
     end
   end
 
@@ -98,9 +90,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get artist top tracks failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_artist_top_tracks(artist_id, token)
+        {:error, "Get artist top tracks failed"}
     end
   end
 
@@ -111,6 +101,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get playlist failed with error: #{inspect(err)}")
+        {:error, "Get playlist failed"}
     end
   end
 
@@ -121,9 +112,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get show failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_show(show_id, token)
+        {:error, "Get show failed"}
     end
   end
 
@@ -134,9 +123,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Get episode failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        get_episode(episode_id, token)
+        {:error, "Get episode failed"}
     end
   end
 
@@ -153,9 +140,7 @@ defmodule SpotifyUriBot.Api do
     else
       err ->
         Logger.error("Search failed with error: #{inspect(err)}")
-        Logger.error("Retrying...")
-        Process.sleep(500)
-        search(query, types, token)
+        {:error, "Search failed"}
     end
   end
 end
