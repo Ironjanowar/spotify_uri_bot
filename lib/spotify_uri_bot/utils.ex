@@ -155,14 +155,14 @@ defmodule SpotifyUriBot.Utils do
     end
   end
 
-  def retry_n(n, fa, time \\ 500)
+  def retry_n(n, args, callback, time \\ 500)
 
-  def retry_n(n, {callback, args}, time) when n <= 0 do
+  def retry_n(n, args, callback, time) when n <= 0 do
     Process.sleep(time)
     apply(callback, args)
   end
 
-  def retry_n(n, {callback, args}, time) do
+  def retry_n(n, args, callback, time) do
     Process.sleep(time)
 
     case apply(callback, args) do

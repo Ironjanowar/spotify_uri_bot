@@ -6,8 +6,6 @@ defmodule SpotifyUriBot.Server do
   alias SpotifyUriBot.Api
   alias SpotifyUriBot.Utils
 
-  @retries 5
-
   def child_spec(_) do
     %{
       id: __MODULE__,
@@ -54,51 +52,49 @@ defmodule SpotifyUriBot.Server do
   end
 
   def handle_call({:track, track_id}, _from, state) do
-    {:ok, token} = Utils.retry_n(@retries, {&Api.get_token/0, []})
-    {:ok, track_info} = Utils.retry_n(@retries, {&Api.get_track/2, [track_id, token]})
+    {:ok, token} = Api.get_token()
+    {:ok, track_info} = Api.get_track(track_id, token)
     {:reply, {:ok, track_info}, state}
   end
 
   def handle_call({:album, album_id}, _from, state) do
-    {:ok, token} = Utils.retry_n(@retries, {&Api.get_token/0, []})
-    {:ok, album_info} = Utils.retry_n(@retries, {&Api.get_album/2, [album_id, token]})
+    {:ok, token} = Api.get_token()
+    {:ok, album_info} = Api.get_album(album_id, token)
     {:reply, {:ok, album_info}, state}
   end
 
   def handle_call({:artist, artist_id}, _from, state) do
-    {:ok, token} = Utils.retry_n(@retries, {&Api.get_token/0, []})
-    {:ok, artist_info} = Utils.retry_n(@retries, {&Api.get_artist/2, [artist_id, token]})
+    {:ok, token} = Api.get_token()
+    {:ok, artist_info} = Api.get_artist(artist_id, token)
 
-    {:ok, top_tracks} =
-      Utils.retry_n(@retries, {&Api.get_artist_top_tracks/2, [artist_id, token]})
+    {:ok, top_tracks} = Api.get_artist_top_tracks(artist_id, token)
 
     artist_info = Map.put(artist_info, :top_tracks, top_tracks)
     {:reply, {:ok, artist_info}, state}
   end
 
   def handle_call({:playlist, playlist_id}, _from, state) do
-    {:ok, token} = Utils.retry_n(@retries, {&Api.get_token/0, []})
-    {:ok, playlist_info} = Utils.retry_n(@retries, {&Api.get_playlist/2, [playlist_id, token]})
+    {:ok, token} = Api.get_token()
+    {:ok, playlist_info} = Api.get_playlist(playlist_id, token)
     {:reply, {:ok, playlist_info}, state}
   end
 
   def handle_call({:show, show_id}, _from, state) do
-    {:ok, token} = Utils.retry_n(@retries, {&Api.get_token/0, []})
-    {:ok, show_info} = Utils.retry_n(@retries, {&Api.get_show/2, [show_id, token]})
+    {:ok, token} = Api.get_token()
+    {:ok, show_info} = Api.get_show(show_id, token)
     {:reply, {:ok, show_info}, state}
   end
 
   def handle_call({:episode, episode_id}, _from, state) do
-    {:ok, token} = Utils.retry_n(@retries, {&Api.get_token/0, []})
-    {:ok, episode_info} = Utils.retry_n(@retries, {&Api.get_episode/2, [episode_id, token]})
+    {:ok, token} = Api.get_token()
+    {:ok, episode_info} = Api.get_episode(episode_id, token)
     {:reply, {:ok, episode_info}, state}
   end
 
   def handle_call({:search, text}, _from, state) do
     with {search_type, search_query} <- Utils.get_search_type(text),
-         {:ok, token} <- Utils.retry_n(@retries, {&Api.get_token/0, []}),
-         {:ok, search_result} <-
-           Utils.retry_n(@retries, {&Api.search/3, [search_query, [search_type], token]}) do
+         {:ok, token} <- Api.get_token(),
+         {:ok, search_result} <- Api.search(search_query, [search_type], token) do
       {:reply, {:ok, search_type, search_result}, state}
     else
       err ->
