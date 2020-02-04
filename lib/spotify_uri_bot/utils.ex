@@ -5,6 +5,8 @@ defmodule SpotifyUriBot.Utils do
   alias ExGram.Model.InlineQueryResultArticle
   alias ExGram.Model.InputTextMessageContent
 
+  require Logger
+
   uri_parse =
     ignore(string("spotify:"))
     |> choice([
@@ -67,48 +69,50 @@ defmodule SpotifyUriBot.Utils do
   end
 
   def search_result_to_result_audio(%{preview_url: nil} = track) do
-    message_format = """
-    🎤 Artist: `#{track[:artist]}`
-    🎵 Song: `#{track[:name]}`
-    📀 Album: `#{track[:album]}`
-    🔗 URI: `#{track[:uri]}`
-    """
+    message_format =
+      """
+      🎤 Artist: `#{track.artist}`
+      🎵 Song: `#{track.name}`
+      📀 Album: `#{track.album}`
+      🔗 URI: `#{track.uri}`
+      """ <> SpotifyUriBot.Utils.hashtags(track.genres)
 
-    markup = SpotifyUriBot.Utils.generate_url_button(track[:href])
+    markup = SpotifyUriBot.Utils.generate_url_button(track.href)
 
     %InlineQueryResultArticle{
       type: "article",
-      id: track[:uri],
-      title: track[:name],
+      id: track.uri,
+      title: track.name,
       input_message_content: %InputTextMessageContent{
         message_text: message_format,
         parse_mode: "Markdown"
       },
       reply_markup: markup,
-      description: track[:artist]
+      description: track.artist
     }
   end
 
   def search_result_to_result_audio(track) do
-    message_format = """
-    🎤 Artist: `#{track[:artist]}`
-    🎵 Song: `#{track[:name]}`
-    📀 Album: `#{track[:album]}`
-    🔗 URI: `#{track[:uri]}`
-    """
+    message_format =
+      """
+      🎤 Artist: `#{track.artist}`
+      🎵 Song: `#{track.name}`
+      📀 Album: `#{track.album}`
+      🔗 URI: `#{track.uri}`
+      """ <> SpotifyUriBot.Utils.hashtags(track.genres)
 
     markup =
-      case track[:preview_url] do
-        nil -> SpotifyUriBot.Utils.generate_url_button(track[:href])
-        _ -> SpotifyUriBot.Utils.generate_url_buttons(track[:href], track[:uri])
+      case track.preview_url do
+        nil -> SpotifyUriBot.Utils.generate_url_button(track.href)
+        _ -> SpotifyUriBot.Utils.generate_url_buttons(track.href, track.uri)
       end
 
     %InlineQueryResultAudio{
       type: "audio",
-      id: track[:uri],
-      title: track[:name],
-      performer: track[:artist],
-      audio_url: track[:preview_url],
+      id: track.uri,
+      title: track.name,
+      performer: track.artist,
+      audio_url: track.preview_url,
       input_message_content: %InputTextMessageContent{
         message_text: message_format,
         parse_mode: "Markdown"
@@ -138,5 +142,36 @@ defmodule SpotifyUriBot.Utils do
          "#" <> (genre |> String.replace(~r/-| /, ""))
        end)
        |> Enum.join(" "))
+  end
+
+  def get_search_type(search_query) do
+    [potential_type | query] =
+      search_query
+      |> String.split(" ", trim: true)
+
+    case potential_type do
+      "!" <> type -> {String.to_atom(type), Enum.join(query, " ")}
+      _ -> {:track, search_query}
+    end
+  end
+
+  def retry_n(n, args, callback, time \\ 500)
+
+  def retry_n(n, args, callback, time) when n <= 0 do
+    Process.sleep(time)
+    apply(callback, args)
+  end
+
+  def retry_n(n, args, callback, time) do
+    Process.sleep(time)
+
+    case apply(callback, args) do
+      {:error, _} ->
+        Logger.error("Retrying...")
+        retry_n(n - 1, {callback, args}, time)
+
+      result ->
+        result
+    end
   end
 end

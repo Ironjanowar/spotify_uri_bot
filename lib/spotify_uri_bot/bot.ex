@@ -4,9 +4,7 @@ defmodule SpotifyUriBot.Bot do
   use ExGram.Bot,
     name: @bot
 
-  alias ExGram.Model.InlineQueryResultAudio
-  alias ExGram.Model.InlineQueryResultArticle
-  alias ExGram.Model.InputTextMessageContent
+  alias SpotifyUriBot.MessageFormatter
 
   require Logger
 
@@ -29,15 +27,14 @@ defmodule SpotifyUriBot.Bot do
   end
 
   def handle({:text, text, %{message_id: message_id}}, context) do
-    case generate_message(text) do
-      :no_message ->
-        :ok
+    case get_entity(text) do
+      {:ok, _, result} ->
+        {message, markup} = MessageFormatter.get_message_with_markup(result)
 
-      {:ok, result} ->
-        answer(context, result[:message],
+        answer(context, message,
           parse_mode: "Markdown",
           reply_to_message_id: message_id,
-          reply_markup: result[:markup] || ""
+          reply_markup: markup || ""
         )
 
       _ ->
@@ -92,204 +89,127 @@ defmodule SpotifyUriBot.Bot do
   end
 
   defp generate_inline_options(text) do
-    case generate_message(text) do
-      {:ok, %{info: %{preview_url: preview_url}} = result} when not is_nil(preview_url) ->
-        Logger.debug("Generating audio")
-
+    case get_entity(text) do
+      {:ok, :track, track} ->
         {:ok,
          [
-           %InlineQueryResultAudio{
-             type: "audio",
-             id: result[:info][:uri],
-             title: result[:info][:name],
-             performer: result[:info][:artist],
-             audio_url: result[:info][:preview_url],
-             input_message_content: %InputTextMessageContent{
-               message_text: result[:message],
-               parse_mode: "Markdown"
-             },
-             reply_markup: result[:markup]
-           }
+           MessageFormatter.get_inline_article(track,
+             title: track.name,
+             description: track.artist
+           )
          ]}
 
-      {:ok, %{entity: "Album"} = result} ->
-        Logger.debug("Generating article: #{inspect(result)}")
-
-        album_article = [
-          %InlineQueryResultArticle{
-            type: "article",
-            id: result[:info][:uri],
-            title: "Share" <> (" #{result[:entity]}" || ""),
-            input_message_content: %InputTextMessageContent{
-              message_text: result[:message],
-              parse_mode: "Markdown"
-            },
-            reply_markup: result[:markup],
-            description: result[:info][:name] || ""
-          }
-        ]
-
-        track_articles =
-          Enum.map(result[:info][:tracks], &SpotifyUriBot.Utils.search_result_to_result_audio/1)
-
-        {:ok, album_article ++ track_articles}
-
-      {:ok, %{entity: "Artist"} = result} ->
-        Logger.debug("Generating article: #{inspect(result)}")
-
-        artist_article = [
-          %InlineQueryResultArticle{
-            type: "article",
-            id: result[:info][:uri],
-            title: "Share" <> (" #{result[:entity]}" || ""),
-            input_message_content: %InputTextMessageContent{
-              message_text: result[:message],
-              parse_mode: "Markdown"
-            },
-            reply_markup: result[:markup],
-            description: result[:info][:name] || ""
-          }
-        ]
-
-        top_tracks_articles =
-          Enum.map(
-            result[:info][:top_tracks],
-            &SpotifyUriBot.Utils.search_result_to_result_audio/1
+      {:ok, :artist, artist} ->
+        artist_article =
+          MessageFormatter.get_inline_article(artist,
+            title: "Share artist",
+            description: artist.name
           )
 
-        {:ok, artist_article ++ top_tracks_articles}
+        track_articles =
+          Enum.map(
+            artist.top_tracks,
+            &MessageFormatter.get_inline_article(&1, title: &1.name, description: &1.artist)
+          )
 
-      {:ok, result} ->
-        Logger.debug("Generating article: #{inspect(result)}")
+        {:ok, [artist_article | track_articles]}
 
-        {:ok,
-         [
-           %InlineQueryResultArticle{
-             type: "article",
-             id: result[:info][:uri],
-             title: "Share" <> (" #{result[:entity]}" || ""),
-             input_message_content: %InputTextMessageContent{
-               message_text: result[:message],
-               parse_mode: "Markdown"
-             },
-             reply_markup: result[:markup],
-             description: result[:info][:name] || ""
-           }
-         ]}
+      {:ok, :album, album} ->
+        album_article =
+          MessageFormatter.get_inline_article(album, title: "Share album", description: album.name)
 
-      {:no_uri, search_query} ->
-        {:ok, result} = SpotifyUriBot.Server.search(search_query)
-        audios = Enum.map(result, &SpotifyUriBot.Utils.search_result_to_result_audio/1)
-        {:ok, audios}
+        track_articles =
+          Enum.map(
+            album.tracks,
+            &MessageFormatter.get_inline_article(&1, title: &1.name, description: &1.artist)
+          )
+
+        {:ok, [album_article | track_articles]}
+
+      {:ok, :playlist, playlist} ->
+        playlist_article =
+          MessageFormatter.get_inline_article(playlist,
+            title: "Share playlist",
+            description: playlist.name
+          )
+
+        {:ok, [playlist_article]}
+
+      {:ok, :show, show} ->
+        show_article =
+          MessageFormatter.get_inline_article(show, title: "Share show", description: show.name)
+
+        episode_articles =
+          Enum.map(
+            show.episodes,
+            &MessageFormatter.get_inline_article(&1, title: &1.name, description: &1.publisher)
+          )
+
+        {:ok, [show_article | episode_articles]}
+
+      {:ok, :episode, episode} ->
+        episode_article =
+          MessageFormatter.get_inline_article(episode,
+            title: episode.name,
+            description: episode.publisher
+          )
+
+        {:ok, [episode_article]}
+
+      {:no_uri, text} ->
+        case SpotifyUriBot.Server.search(text) do
+          {:ok, _, {_, entity}} ->
+            entity_articles =
+              Enum.map(
+                entity,
+                &MessageFormatter.get_inline_article(&1,
+                  title: &1.title,
+                  description: &1.description
+                )
+              )
+
+            {:ok, entity_articles}
+
+          _ ->
+            :ignore
+        end
 
       _ ->
         :ignore
     end
   end
 
-  defp generate_message(text) do
+  defp get_entity(text) do
     case SpotifyUriBot.Utils.parse_text(text) do
       {:ok, :track, uri} ->
         {:ok, track} = SpotifyUriBot.Server.get_track(uri)
-
-        message =
-          """
-          🎤 Artist: `#{track[:artist]}`
-          🎵 Song: `#{track[:name]}`
-          📀 Album: `#{track[:album]}`
-          🔗 URI: `#{track[:uri]}`
-          """ <> SpotifyUriBot.Utils.hashtags(track[:genres])
-
-        markup =
-          case track[:preview_url] do
-            nil -> SpotifyUriBot.Utils.generate_url_button(track[:href])
-            _ -> SpotifyUriBot.Utils.generate_url_buttons(track[:href], track[:uri])
-          end
-
         Logger.debug("Message generated for #{uri}")
-        {:ok, %{message: message, markup: markup, info: track, entity: "Track"}}
+        {:ok, :track, track}
 
       {:ok, :album, uri} ->
         {:ok, album} = SpotifyUriBot.Server.get_album(uri)
-
-        message =
-          """
-          🎤 Artist: `#{album[:artist]}`
-          📀 Album: `#{album[:name]}`
-          📅 Release date: `#{album[:release_date]}`
-          🔗 URI: `#{album[:uri]}`
-          """ <> SpotifyUriBot.Utils.hashtags(album[:genres])
-
-        markup = SpotifyUriBot.Utils.generate_url_buttons(album[:href], album[:uri])
         Logger.debug("Message generated for #{uri}")
-        {:ok, %{message: message, markup: markup, info: album, entity: "Album"}}
+        {:ok, :album, album}
 
       {:ok, :artist, uri} ->
         {:ok, artist} = SpotifyUriBot.Server.get_artist(uri)
-
-        message =
-          """
-          🎤 Artist: `#{artist[:name]}`
-          🔗 URI: `#{artist[:uri]}`
-          """ <> SpotifyUriBot.Utils.hashtags(artist[:genres])
-
-        markup = SpotifyUriBot.Utils.generate_url_buttons(artist[:href], artist[:uri])
-
         Logger.debug("Message generated for #{uri}")
-        {:ok, %{message: message, markup: markup, info: artist, entity: "Artist"}}
+        {:ok, :artist, artist}
 
       {:ok, :playlist, uri} ->
         {:ok, playlist} = SpotifyUriBot.Server.get_playlist(uri)
-
-        description =
-          case playlist[:description] do
-            d when d in ["", nil] -> ""
-            d -> "Description: `#{d}`"
-          end
-
-        message = """
-        📄 Name: `#{playlist[:name]}`
-        👤 Owner: `#{playlist[:owner]}`
-        🔗 URI: `#{playlist[:uri]}`
-        #{description}
-        """
-
-        markup = SpotifyUriBot.Utils.generate_url_button(playlist[:href])
         Logger.debug("Message generated for #{uri}")
-        {:ok, %{message: message, markup: markup, info: playlist, entity: "Playlist"}}
+        {:ok, :playlist, playlist}
 
       {:ok, :show, uri} ->
         {:ok, show} = SpotifyUriBot.Server.get_show(uri)
-
-        message = """
-        📄 Name: `#{show[:name]}`
-        👤 Publisher: `#{show[:publisher]}`
-        🌐 Languages: `#{Enum.join(show[:languages], ", ")}`
-        #️⃣ Number of episodes: `#{show[:episodes]}`
-        🔗 URI: `#{show[:uri]}`
-        📗 Description:
-        `#{show[:description]}`
-        """
-
-        markup = SpotifyUriBot.Utils.generate_url_button(show[:href])
         Logger.debug("Message generated for #{uri}")
-        {:ok, %{message: message, markup: markup, info: show, entity: "Show"}}
+        {:ok, :show, show}
 
       {:ok, :episode, uri} ->
         {:ok, episode} = SpotifyUriBot.Server.get_episode(uri)
-
-        message = """
-        📄 Name: `#{episode[:name]}`
-        👤 Publisher: `#{episode[:publisher]}`
-        🌐 Languages: `#{episode[:language]}`
-        🔗 URI: `#{episode[:uri]}`
-        📗 Description:
-        `#{episode[:description]}`
-        """
-
-        markup = SpotifyUriBot.Utils.generate_url_buttons(episode[:href], episode[:uri])
         Logger.debug("Message generated for #{uri}")
-        {:ok, %{message: message, markup: markup, info: episode, entity: "Episode"}}
+        {:ok, :episode, episode}
 
       {:error, message} ->
         Logger.debug(message)
