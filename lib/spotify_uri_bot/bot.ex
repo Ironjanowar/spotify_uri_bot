@@ -10,6 +10,7 @@ defmodule SpotifyUriBot.Bot do
 
   middleware(SpotifyUriBot.Middleware.Stats)
   middleware(SpotifyUriBot.Middleware.Admin)
+  middleware(SpotifyUriBot.Middleware.IgnoreBotMessage)
 
   def bot(), do: @bot
 
@@ -26,7 +27,10 @@ defmodule SpotifyUriBot.Bot do
     end
   end
 
-  def handle({:text, text, %{message_id: message_id}}, context) do
+  def handle(
+        {:text, text, %{message_id: message_id}},
+        %{extra: %{message_from_bot: false}} = context
+      ) do
     case get_entity(text) do
       {:ok, _, result} ->
         {message, markup} = MessageFormatter.get_message_with_markup(result)
