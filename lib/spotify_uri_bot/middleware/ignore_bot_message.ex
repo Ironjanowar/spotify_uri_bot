@@ -3,11 +3,23 @@ defmodule SpotifyUriBot.Middleware.IgnoreBotMessage do
 
   alias ExGram.Cnt
 
-  def call(%Cnt{update: %{message: %{text: text}}} = cnt, _opts) do
-    if String.contains?(text, "🔗 URI: ") do
-      add_extra(cnt, :message_from_bot, true)
+  defp is_spotify_button?(%{text: "Open in Spotify"}), do: true
+  defp is_spotify_button?(_), do: false
+
+  def call(
+        %Cnt{
+          update: %{
+            message: %{
+              reply_markup: %{inline_keyboard: [[first_button | _] | _]}
+            }
+          }
+        } = cnt,
+        _opts
+      ) do
+    if is_spotify_button?(first_button) do
+      %{cnt | halted: true}
     else
-      add_extra(cnt, :message_from_bot, false)
+      cnt
     end
   end
 
