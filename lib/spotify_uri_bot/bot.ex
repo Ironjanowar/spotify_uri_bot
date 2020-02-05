@@ -10,6 +10,7 @@ defmodule SpotifyUriBot.Bot do
 
   middleware(SpotifyUriBot.Middleware.Stats)
   middleware(SpotifyUriBot.Middleware.Admin)
+  middleware(SpotifyUriBot.Middleware.IgnoreBotMessage)
 
   def bot(), do: @bot
 
