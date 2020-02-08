@@ -70,7 +70,8 @@ defmodule SpotifyUriBot.MessageFormatter do
 
   def get_inline_article(entity, opts \\ [])
 
-  def get_inline_article(%{preview_url: _preview_url} = entity, opts) do
+  def get_inline_article(%{preview_url: preview_url} = entity, opts)
+      when not is_nil(preview_url) do
     {message_text, markup} = get_message_with_markup(entity)
 
     %InlineQueryResultAudio{
