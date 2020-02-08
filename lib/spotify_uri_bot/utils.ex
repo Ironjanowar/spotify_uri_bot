@@ -46,7 +46,7 @@ defmodule SpotifyUriBot.Utils do
 
   def parse_text(text) do
     text
-    |> String.split(" ", trim: true)
+    |> String.split([" ", "\n"], trim: true)
     |> Enum.find_value(fn t ->
       case uri_parser(t) do
         {:ok, [type, uri], _, _, _, _} -> {:ok, String.to_atom(type), uri}
