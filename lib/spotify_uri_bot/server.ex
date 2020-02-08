@@ -99,7 +99,7 @@ defmodule SpotifyUriBot.Server do
     else
       err ->
         Logger.error("Error while searching: #{inspect(err)}")
-        {:error, "No results"}
+        {:reply, {:error, "No results"}, state}
     end
   end
 end
