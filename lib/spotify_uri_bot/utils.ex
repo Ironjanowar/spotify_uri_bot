@@ -187,7 +187,7 @@ defmodule SpotifyUriBot.Utils do
     """
     _*Direct message or chat message*_
 
-    Add the bot to a chat to parse all Spotify URIs and URLs that are sent to the chat or send a message to @spotify\_uri\_bot
+    Add the bot to a chat to parse all Spotify URIs and URLs that are sent to the chat or send a message to @spotify\\_uri\\_bot
 
     _*Inline mode*_
 
