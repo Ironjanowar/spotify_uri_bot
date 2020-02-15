@@ -5,6 +5,7 @@ defmodule SpotifyUriBot.Bot do
     name: @bot
 
   alias SpotifyUriBot.MessageFormatter
+  alias SpotifyUriBot.Utils
 
   require Logger
 
@@ -15,7 +16,11 @@ defmodule SpotifyUriBot.Bot do
   def bot(), do: @bot
 
   def handle({:command, "start", _msg}, context) do
-    answer(context, "Hi!")
+    answer(context, Utils.start_message(), parse_mode: "MarkdownV2")
+  end
+
+  def handle({:command, "help", _msg}, context) do
+    answer(context, Utils.help_message(), parse_mode: "MarkdownV2")
   end
 
   def handle({:inline_query, %{query: ""}}, _context), do: :ok

@@ -174,4 +174,32 @@ defmodule SpotifyUriBot.Utils do
         result
     end
   end
+
+  def start_message() do
+    """
+    Hi\\! This bot parses Spotify URIs and URLs to extract information and send it to a chat\\. Send /help to see how to use it\\.
+
+    _Made with_ ❤ _by_ [Ironjanowar](https://github.com/ironjanowar)
+    """
+  end
+
+  def help_message() do
+    """
+    _*Direct message or chat message*_
+
+    Add the bot to a chat to parse all Spotify URIs and URLs that are sent to the chat or send a message to @spotify\_uri\_bot
+
+    _*Inline mode*_
+
+    Type `@spotify_uri_bot <URI | URL | search query>` in any chat to use the bot via inline\\. There are several options:
+      \\- If an URI or URL is detected it will extract the information and show a list of message to send, by clicking on any element of the list you will send via inline the information of what the bot found\\.
+
+      \\- If no URI nor URL is found, the bot will try to search the text in Spotify and show the results\\. This will search *ONLY* Spotify tracks, if you want to search for something else you will have to specify it, these are the options:
+        \\- `@spotify_uri_bot !artist <search query>`
+        \\- `@spotify_uri_bot !album <search query>`
+        \\- `@spotify_uri_bot !playlist <search query>`
+        \\- `@spotify_uri_bot !show <search query>`
+        \\- `@spotify_uri_bot !episode <search query>`
+    """
+  end
 end
