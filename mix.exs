@@ -27,13 +27,14 @@ defmodule SpotifyUriBot.MixProject do
       {:gun, "~> 1.3"},
       {:jason, "~> 1.1"},
       {:nimble_parsec, "~> 0.2"},
-      {:redix, ">= 0.0.0"},
+      {:redix, "~> 0.10"},
       {:quantum, "~> 2.3"},
       {:timex, "~> 3.0"},
-      {:logger_file_backend, "0.0.11"},
       # Gigalixir
       {:plug, "~> 1.7"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:logger_json_file_backend,
+       github: "xflagstudio/elixir_logger_json_file_backend", tag: "0.1.9"}
     ]
   end
 end
