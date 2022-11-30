@@ -1,3 +1,13 @@
+* Spotify Song Cards
+This fork allows you to generate images as song cards using the commands `/card` and `/gradcard`.
+These two create either a card with a plain background or with a gradient background respectively.
+The only thing you need is to provide an URI for your favorite song.
+
+*** Examples:
+[[file:examples/ephmr.jpg]]
+[[file:examples/yousaid.jpg]]
+[[file:examples/dontwanttogo.jpg]]
+
 * Run it
 Create a bot talking to ~@BotFather~ in Telegram.
 Create a ~bot.token~ file with the bot token provided by ~@BotFather~, for example:

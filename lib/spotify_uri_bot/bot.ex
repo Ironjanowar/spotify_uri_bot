@@ -17,8 +17,11 @@ defmodule SpotifyUriBot.Bot do
 
   command("start", description: "Says hello")
   command("help", description: "Sends information about the bot")
-  command("card", description: "Makes a image card for a song")
-  command("gradcard", description: "Makes a image card for a song with a gradient background")
+  command("card", description: "Makes a image card for a song from a valid track URI")
+
+  command("gradcard",
+    description: "Makes a image card for a song with a gradient background from a valid track URI"
+  )
 
   def bot(), do: @bot
 
@@ -32,7 +35,7 @@ defmodule SpotifyUriBot.Bot do
 
   def handle(
         {:command, :card, %{text: text, message_id: message_id, chat: %{id: chat_id}}},
-        _context
+        context
       ) do
     case get_entity(text) do
       {:ok, _, result} ->
@@ -40,13 +43,13 @@ defmodule SpotifyUriBot.Bot do
         ExGram.send_photo(chat_id, {:file_content, binary, ""}, reply_to_message_id: message_id)
 
       _ ->
-        :ok
+        answer(context, "You need to enter a valid URI for a track")
     end
   end
 
   def handle(
         {:command, :gradcard, %{text: text, message_id: message_id, chat: %{id: chat_id}}},
-        _context
+        context
       ) do
     case get_entity(text) do
       {:ok, _, result} ->
@@ -54,7 +57,7 @@ defmodule SpotifyUriBot.Bot do
         ExGram.send_photo(chat_id, {:file_content, binary, ""}, reply_to_message_id: message_id)
 
       _ ->
-        :ok
+        answer(context, "You need to enter a valid URI for a track")
     end
   end
 
