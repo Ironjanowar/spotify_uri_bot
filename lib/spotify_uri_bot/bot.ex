@@ -2,10 +2,12 @@ defmodule SpotifyUriBot.Bot do
   @bot :spotify_uri_bot
 
   use ExGram.Bot,
-    name: @bot
+    name: @bot,
+    setup_commands: true
 
   alias SpotifyUriBot.MessageFormatter
   alias SpotifyUriBot.Utils
+  alias SpotifyUriBot.Images
 
   require Logger
 
@@ -13,14 +15,47 @@ defmodule SpotifyUriBot.Bot do
   middleware(SpotifyUriBot.Middleware.Admin)
   middleware(SpotifyUriBot.Middleware.IgnoreBotMessage)
 
+  command("start", description: "Says hello")
+  command("help", description: "Sends information about the bot")
+  command("card", description: "Makes a image card for a song")
+  command("gradcard", description: "Makes a image card for a song with a gradient background")
+
   def bot(), do: @bot
 
-  def handle({:command, "start", _msg}, context) do
+  def handle({:command, :start, _msg}, context) do
     answer(context, Utils.start_message(), parse_mode: "MarkdownV2")
   end
 
-  def handle({:command, "help", _msg}, context) do
+  def handle({:command, :help, _msg}, context) do
     answer(context, Utils.help_message(), parse_mode: "MarkdownV2")
+  end
+
+  def handle(
+        {:command, :card, %{text: text, message_id: message_id, chat: %{id: chat_id}}},
+        _context
+      ) do
+    case get_entity(text) do
+      {:ok, _, result} ->
+        {:ok, binary} = Images.renderCardFromEntity(result, :plain)
+        ExGram.send_photo(chat_id, {:file_content, binary, ""}, reply_to_message_id: message_id)
+
+      _ ->
+        :ok
+    end
+  end
+
+  def handle(
+        {:command, :gradcard, %{text: text, message_id: message_id, chat: %{id: chat_id}}},
+        _context
+      ) do
+    case get_entity(text) do
+      {:ok, _, result} ->
+        {:ok, binary} = Images.renderCardFromEntity(result, :gradient)
+        ExGram.send_photo(chat_id, {:file_content, binary, ""}, reply_to_message_id: message_id)
+
+      _ ->
+        :ok
+    end
   end
 
   def handle({:inline_query, %{query: ""}}, _context), do: :ok
@@ -33,6 +68,8 @@ defmodule SpotifyUriBot.Bot do
   end
 
   def handle({:text, text, %{message_id: message_id}}, context) do
+    Logger.debug(text)
+
     case get_entity(text) do
       {:ok, _, result} ->
         {message, markup} = MessageFormatter.get_message_with_markup(result)
