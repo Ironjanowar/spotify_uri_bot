@@ -202,13 +202,7 @@ defmodule SpotifyUriBot.Images do
         "#" <> (String.split(genre) |> Enum.join())
       end)
 
-    # Check if there is any genre at all
-    # any_genres =
-    #  if String.length(genres_text) > 0,
-    #    do: Image.Text.text(genres_text, genres_text_options(genres_text, finish_color)),
-    #    else: :no_genres
-
-    # If there was at least one genre, canvas is modified
+    # If there is at least one genre, canvas is modified
     {:ok, canvas} =
       with true <- String.length(genres_text) > 0,
            {_, finish_color} <- dominant_colors_result,
