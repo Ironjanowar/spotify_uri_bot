@@ -68,8 +68,6 @@ defmodule SpotifyUriBot.Bot do
   end
 
   def handle({:text, text, %{message_id: message_id}}, context) do
-    Logger.debug(text)
-
     case get_entity(text) do
       {:ok, _, result} ->
         {message, markup} = MessageFormatter.get_message_with_markup(result)
