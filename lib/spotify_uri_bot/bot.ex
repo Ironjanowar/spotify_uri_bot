@@ -2,10 +2,12 @@ defmodule SpotifyUriBot.Bot do
   @bot :spotify_uri_bot
 
   use ExGram.Bot,
-    name: @bot
+    name: @bot,
+    setup_commands: true
 
   alias SpotifyUriBot.MessageFormatter
   alias SpotifyUriBot.Utils
+  alias SpotifyUriBot.Images
 
   require Logger
 
@@ -13,14 +15,50 @@ defmodule SpotifyUriBot.Bot do
   middleware(SpotifyUriBot.Middleware.Admin)
   middleware(SpotifyUriBot.Middleware.IgnoreBotMessage)
 
+  command("start", description: "Says hello")
+  command("help", description: "Sends information about the bot")
+  command("card", description: "Makes a image card for a song from a valid track URI")
+
+  command("gradcard",
+    description: "Makes a image card for a song with a gradient background from a valid track URI"
+  )
+
   def bot(), do: @bot
 
-  def handle({:command, "start", _msg}, context) do
+  def handle({:command, :start, _msg}, context) do
     answer(context, Utils.start_message(), parse_mode: "MarkdownV2")
   end
 
-  def handle({:command, "help", _msg}, context) do
+  def handle({:command, :help, _msg}, context) do
     answer(context, Utils.help_message(), parse_mode: "MarkdownV2")
+  end
+
+  def handle(
+        {:command, :card, %{text: text, message_id: message_id, chat: %{id: chat_id}}},
+        context
+      ) do
+    case get_entity(text) do
+      {:ok, _, result} ->
+        {:ok, binary} = Images.renderCardFromEntity(result, :plain)
+        ExGram.send_photo(chat_id, {:file_content, binary, ""}, reply_to_message_id: message_id)
+
+      _ ->
+        answer(context, "You need to enter a valid URI for a track")
+    end
+  end
+
+  def handle(
+        {:command, :gradcard, %{text: text, message_id: message_id, chat: %{id: chat_id}}},
+        context
+      ) do
+    case get_entity(text) do
+      {:ok, _, result} ->
+        {:ok, binary} = Images.renderCardFromEntity(result, :gradient)
+        ExGram.send_photo(chat_id, {:file_content, binary, ""}, reply_to_message_id: message_id)
+
+      _ ->
+        answer(context, "You need to enter a valid URI for a track")
+    end
   end
 
   def handle({:inline_query, %{query: ""}}, _context), do: :ok

@@ -1,20 +1,37 @@
 defmodule SpotifyUriBot.Model.Track do
-  defstruct [:artist, :artist_id, :album, :name, :href, :uri, :preview_url, genres: []]
+  defstruct [
+    :artist,
+    :artist_id,
+    :album,
+    :album_type,
+    :images,
+    :name,
+    :href,
+    :uri,
+    :preview_url,
+    genres: []
+  ]
 
   require Logger
 
+  defp multiple_artists(artist, other_artists) do
+    Enum.join([artist | Enum.map(other_artists, fn artist -> artist["name"] end)], ", ")
+  end
+
   def from_api(%{
-        "artists" => [%{"name" => artist, "id" => artist_id} | _],
-        "album" => %{"name" => album_name},
+        "artists" => [%{"name" => artist, "id" => artist_id} | other_artists],
+        "album" => %{"name" => album_name, "images" => images, "album_type" => album_type},
         "name" => song_name,
         "external_urls" => %{"spotify" => href},
         "uri" => uri,
         "preview_url" => preview_url
       }) do
     track = %__MODULE__{
-      artist: artist,
+      artist: multiple_artists(artist, other_artists),
       artist_id: artist_id,
       album: album_name,
+      album_type: album_type,
+      images: images,
       name: song_name,
       href: href,
       uri: uri,
@@ -35,7 +52,7 @@ defmodule SpotifyUriBot.Model.Track do
     Enum.map(tracks, fn track ->
       case track do
         %{
-          "artists" => [%{"name" => artist, "id" => artist_id} | _],
+          "artists" => [%{"name" => artist, "id" => artist_id} | other_artists],
           "name" => song_name,
           "external_urls" => %{"spotify" => href},
           "uri" => uri,
@@ -43,7 +60,7 @@ defmodule SpotifyUriBot.Model.Track do
           "album" => %{"name" => album_name}
         } ->
           %__MODULE__{
-            artist: artist,
+            artist: multiple_artists(artist, other_artists),
             artist_id: artist_id,
             name: song_name,
             href: href,
@@ -60,7 +77,7 @@ defmodule SpotifyUriBot.Model.Track do
 
   def from_album(
         %{
-          "artists" => [%{"name" => artist, "id" => artist_id} | _],
+          "artists" => [%{"name" => artist, "id" => artist_id} | other_artists],
           "name" => song_name,
           "external_urls" => %{"spotify" => href},
           "uri" => uri,
@@ -69,7 +86,7 @@ defmodule SpotifyUriBot.Model.Track do
         album
       ) do
     %__MODULE__{
-      artist: artist,
+      artist: multiple_artists(artist, other_artists),
       artist_id: artist_id,
       name: song_name,
       href: href,

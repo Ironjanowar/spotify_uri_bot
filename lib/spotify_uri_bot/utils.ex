@@ -201,6 +201,14 @@ defmodule SpotifyUriBot.Utils do
         \\- `@spotify_uri_bot !playlist <search query>`
         \\- `@spotify_uri_bot !show <search query>`
         \\- `@spotify_uri_bot !episode <search query>`
+
+    _*Song cards*_
+
+    Use the commands `/card` and `/gradcard` to create song cards for your favorite songs\\.
+    These will either generate a card with a plain background or a card with a gradient background respectively\\.
+    These have to be followed by a valid URI for a track:
+    \\- `/card <track_URI>`
+    \\- `/gradcard <track_URI>`
     """
   end
 end

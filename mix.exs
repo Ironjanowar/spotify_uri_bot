@@ -22,7 +22,7 @@ defmodule SpotifyUriBot.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_gram, "~> 0.8.1"},
+      {:ex_gram, "~> 0.30.0"},
       {:tesla, "~> 1.2.1"},
       {:gun, "~> 1.3"},
       {:jason, "~> 1.1"},
@@ -33,7 +33,9 @@ defmodule SpotifyUriBot.MixProject do
       {:logger_file_backend, "0.0.11"},
       # Gigalixir
       {:plug, "~> 1.7"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      # Image manipulation
+      {:image, "~> 0.14.2"}
     ]
   end
 end
